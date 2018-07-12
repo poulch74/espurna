@@ -2641,9 +2641,10 @@
     #define I2C_SDA_PIN         4
     #define I2C_SCL_PIN         5 
 
-    //#define ADC_MODE_VALUE      ADC_VCC_CUSTOM
-    //#define ADC_VCC_CUSTOM_MUL (15.63)
-    //#define ADC_VCC_CUSTOM_ADD (0)
+    // custom Vcc support
+    #define ADC_MODE_VALUE      ADC_VCC_CUSTOM
+    #define ADC_VCC_CUSTOM_MUL (15.63)
+    #define ADC_VCC_CUSTOM_ADD (0)
 
     // -----------------------------------------------------------------------------
     // RTC_SUPPORT

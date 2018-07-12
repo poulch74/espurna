@@ -89,7 +89,7 @@
 //#define BLITZWOLF_BWSHP2
 //#define BH_ONOFRE
 //#define ITEAD_SONOFF_IFAN02
-//#define SHAPEsp
+#define SHAPEsp
 //--------------------------------------------------------------------------------
 // Features (values below are non-default values)
 //--------------------------------------------------------------------------------
@@ -102,7 +102,7 @@
 //#define DEBUG_WEB_SUPPORT      0
 //#define DOMOTICZ_SUPPORT       0
 //#define HOMEASSISTANT_SUPPORT  0
-//#define I2C_SUPPORT            1
+#define I2C_SUPPORT            1
 //#define INFLUXDB_SUPPORT       1
 //#define IR_SUPPORT             1
 //#define LLMNR_SUPPORT          1  // Only with Arduino Core 2.4.0
