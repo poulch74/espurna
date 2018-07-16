@@ -13,6 +13,8 @@ Copyright (C) 2016-2018 by Xose Pérez <xose dot perez at gmail dot com>
 #include <WiFiClient.h>
 #include <Ticker.h>
 
+#include "libs/sunrise.h"
+
 unsigned long _ntp_start = 0;
 bool _ntp_update = false;
 bool _ntp_configure = false;
@@ -106,6 +108,13 @@ void _ntpUpdate() {
             if(_rtc_update) setTime_rtc(t);
         #endif
 
+        sun.Calc(2018,7,13,srRISE); // month,date - january=1 ;  t= minutes past midnight of sunrise (6 am would be 360)
+        tmElements_t tm;
+        breakTime(t, tm);
+        tm.Hour = sun.getHr();
+        tm.Minute=sun.getMin();
+        time_t st = makeTime(tm); 
+        DEBUG_MSG_P(PSTR("[NTP] Sunrise Time  : %s\n"), (char *) ntpDateTime(st).c_str());
         DEBUG_MSG_P(PSTR("[NTP] UTC Time  : %s\n"), (char *) ntpDateTime(ntpLocal2UTC(t)).c_str());
         DEBUG_MSG_P(PSTR("[NTP] Local Time: %s\n"), (char *) ntpDateTime(t).c_str());
     }

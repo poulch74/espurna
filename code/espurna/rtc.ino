@@ -55,7 +55,6 @@ String _rtc_getValue(String data, char sep, int idx) {
 void _rtcInitCommands() {
 
     settingsRegisterCommand(F("RTC"), [](Embedis* e) {
-        String rtc;
         time_t t;
         tmElements_t tm;
         if (e->argc == 1) {

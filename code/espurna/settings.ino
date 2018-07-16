@@ -117,10 +117,17 @@ void _settingsHelpCommand() {
     // Get sorted list of commands
     std::vector<String> commands;
     unsigned char size = embedis.getCommandCount();
+    DEBUG_MSG_P(PSTR("size > %d\n"), size);
+    DEBUG_MSG_P(PSTR("Available commands:\n"));
+    String command;
     for (unsigned int i=0; i<size; i++) {
 
-        String command = embedis.getCommandName(i);
+        command += embedis.getCommandName(i) + "\n" + stub_ts + "> ";
+
+        //DEBUG_MSG_P(PSTR(" %d > %s %d\n"), i,command.c_str(),getFreeHeap());
+        
         bool inserted = false;
+/*        
         for (unsigned char j=0; j<commands.size(); j++) {
 
             // Check if we have to insert it before the current element
@@ -131,17 +138,17 @@ void _settingsHelpCommand() {
             }
 
         }
-
+*/
         // If we could not insert it, just push it at the end
-        if (!inserted) commands.push_back(command);
+        //if (!inserted) commands.push_back(command);
 
     }
-
+    DEBUG_MSG_P(PSTR(" > %s %d\n"), command.c_str(),getFreeHeap());
     // Output the list
-    DEBUG_MSG_P(PSTR("Available commands:\n"));
-    for (unsigned char i=0; i<commands.size(); i++) {
-        DEBUG_MSG_P(PSTR("> %s\n"), (commands[i]).c_str());
-    }
+    
+    //for (unsigned char i=0; i<commands.size(); i++) {
+      //  DEBUG_MSG_P(PSTR("> %s\n"), (commands[i]).c_str());
+    //}
 
 }
 
@@ -270,7 +277,7 @@ void _settingsInitCommands() {
 
             DEBUG_MSG_P(PSTR("> %s => \"%s\"\n"), key.c_str(), value.c_str());
         }
-
+     
         DEBUG_MSG_P(PSTR("+OK\n"));
     });
 
@@ -296,6 +303,12 @@ void _settingsInitCommands() {
         DEBUG_MSG_P(PSTR("Uptime: %d seconds\n"), getUptime());
         DEBUG_MSG_P(PSTR("+OK\n"));
     });
+
+        settingsRegisterCommand(F("UPTIMEee"), [](Embedis* e) {
+        DEBUG_MSG_P(PSTR("Uptime: %d seconds\n"), getUptime());
+        DEBUG_MSG_P(PSTR("+OK\n"));
+    });
+
 
 }
 

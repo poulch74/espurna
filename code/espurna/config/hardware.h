@@ -2622,10 +2622,11 @@
     //#define BUTTON1_RELAY       1
 
     // Relays
-    //#define RELAY1_PIN          14
+    #define RELAY1_PIN          14
     //#define RELAY1_PIN2         12
     //#define RELAY1_PINP         13 // GPIO_NONE to leave it unused, so no pulse on start valve (autostop not used)
     //#define RELAY1_TYPE         RELAY_TYPE_HBRIDGE
+    #define RELAY1_TYPE         RELAY_TYPE_NORMAL
     // pulse duration for pinP pulse to start valve
     //#define RELAY1_HBPULSE       100
 
