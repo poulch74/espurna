@@ -25,9 +25,10 @@ char _udp_syslog_header[40] = {0};
 #endif
 
 #if DEBUG_ADD_TIMESTAMP
-    String stub_ts("[......] ");
+    const char *stub_ts = "[......] ";
 #else
-    String stub_ts("");
+    const char stub_ts = "";
+    //String stub_ts("");
 #endif
 
 void _debugSend(char * message) {

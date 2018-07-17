@@ -119,17 +119,10 @@ void _settingsHelpCommand() {
     unsigned char size = embedis.getCommandCount();
     DEBUG_MSG_P(PSTR("size > %d\n"), size);
     DEBUG_MSG_P(PSTR("Available commands:\n"));
-    String command;
     for (unsigned int i=0; i<size; i++) {
 
-        command += embedis.getCommandName(i) + "\n" + stub_ts + "> ";
-
-        //DEBUG_MSG_P(PSTR(" %d > %s %d\n"), i,command.c_str(),getFreeHeap());
-        
         bool inserted = false;
-/*        
         for (unsigned char j=0; j<commands.size(); j++) {
-
             // Check if we have to insert it before the current element
             if (commands[j].compareTo(command) > 0) {
                 commands.insert(commands.begin() + j, command);
@@ -138,18 +131,20 @@ void _settingsHelpCommand() {
             }
 
         }
-*/
+
         // If we could not insert it, just push it at the end
-        //if (!inserted) commands.push_back(command);
+        if (!inserted) commands.push_back(command);
 
     }
-    DEBUG_MSG_P(PSTR(" > %s %d\n"), command.c_str(),getFreeHeap());
+    DEBUG_MSG_P(PSTR(">Heap  %d\n"), getFreeHeap());
     // Output the list
-    
-    //for (unsigned char i=0; i<commands.size(); i++) {
-      //  DEBUG_MSG_P(PSTR("> %s\n"), (commands[i]).c_str());
-    //}
+    String command;
+    String str_ts(stub_ts);
+    for (unsigned char i=0; i<commands.size(); i++) {
+        command += commands[i] + "\n" + str_ts + "> ";
+    }
 
+    DEBUG_MSG_P(PSTR("> %s %d\n"), command.c_str(),getFreeHeap());
 }
 
 void _settingsKeysCommand() {
