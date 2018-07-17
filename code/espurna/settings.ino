@@ -117,10 +117,10 @@ void _settingsHelpCommand() {
     // Get sorted list of commands
     std::vector<String> commands;
     unsigned char size = embedis.getCommandCount();
-    DEBUG_MSG_P(PSTR("size > %d\n"), size);
     DEBUG_MSG_P(PSTR("Available commands:\n"));
     for (unsigned int i=0; i<size; i++) {
 
+        String command = embedis.getCommandName(i);
         bool inserted = false;
         for (unsigned char j=0; j<commands.size(); j++) {
             // Check if we have to insert it before the current element
@@ -136,15 +136,13 @@ void _settingsHelpCommand() {
         if (!inserted) commands.push_back(command);
 
     }
-    DEBUG_MSG_P(PSTR(">Heap  %d\n"), getFreeHeap());
     // Output the list
-    String command;
+    String list;
     String str_ts(stub_ts);
     for (unsigned char i=0; i<commands.size(); i++) {
-        command += commands[i] + "\n" + str_ts + "> ";
+        list += commands[i] + "\n" + str_ts + "> ";
     }
-
-    DEBUG_MSG_P(PSTR("> %s %d\n"), command.c_str(),getFreeHeap());
+    DEBUG_MSG_P(PSTR("> %s----------\n"), list.c_str());
 }
 
 void _settingsKeysCommand() {

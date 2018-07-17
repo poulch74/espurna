@@ -256,7 +256,7 @@ void _info_print_memory_layout_line(const char * name, unsigned long bytes) {
 }
 
 void info() {
-
+/*
     DEBUG_MSG_P(PSTR("\n\n"));
     DEBUG_MSG_P(PSTR("[INIT] %s %s\n"), (char *) APP_NAME, (char *) APP_VERSION);
     DEBUG_MSG_P(PSTR("[INIT] %s\n"), (char *) APP_AUTHOR);
@@ -267,14 +267,36 @@ void info() {
     DEBUG_MSG_P(PSTR("[INIT] Core version: %s\n"), getCoreVersion().c_str());
     DEBUG_MSG_P(PSTR("[INIT] Core revision: %s\n"), getCoreRevision().c_str());
     DEBUG_MSG_P(PSTR("\n"));
+*/
+    char buf[512];
+
+    char *ptr = buf;
+    ptr+=snprintf_P(ptr,64,PSTR("%s[INIT] %s %s\n"), stub_ts,(char *) APP_NAME, (char *) APP_VERSION);
+    ptr+=snprintf_P(ptr,64,PSTR("%s[INIT] %s\n"), stub_ts,(char *) APP_AUTHOR);
+    ptr+=snprintf_P(ptr,64,PSTR("%s[INIT] %s\n\n"), stub_ts, (char *) APP_WEBSITE);
+    ptr+=snprintf_P(ptr,64,PSTR("%s[INIT] CPU chip ID: 0x%06X\n"), stub_ts, ESP.getChipId());
+    ptr+=snprintf_P(ptr,64,PSTR("%s[INIT] CPU frequency: %u MHz\n"), stub_ts, ESP.getCpuFreqMHz());
+    ptr+=snprintf_P(ptr,64,PSTR("%s[INIT] SDK version: %s\n"), stub_ts, ESP.getSdkVersion());
+    ptr+=snprintf_P(ptr,64,PSTR("%s[INIT] Core version: %s\n"), stub_ts, getCoreVersion().c_str());
+         snprintf_P(ptr,64,PSTR("%s[INIT] Core revision: %s\n"), stub_ts, getCoreRevision().c_str());
+
+    DEBUG_MSG_P(PSTR("\n\n%s\n"),buf);
 
     // -------------------------------------------------------------------------
 
     FlashMode_t mode = ESP.getFlashChipMode();
+/*    
     DEBUG_MSG_P(PSTR("[INIT] Flash chip ID: 0x%06X\n"), ESP.getFlashChipId());
     DEBUG_MSG_P(PSTR("[INIT] Flash speed: %u Hz\n"), ESP.getFlashChipSpeed());
     DEBUG_MSG_P(PSTR("[INIT] Flash mode: %s\n"), mode == FM_QIO ? "QIO" : mode == FM_QOUT ? "QOUT" : mode == FM_DIO ? "DIO" : mode == FM_DOUT ? "DOUT" : "UNKNOWN");
     DEBUG_MSG_P(PSTR("\n"));
+*/
+    ptr = buf;
+    ptr+=snprintf_P(ptr,64,PSTR("%s[INIT] Flash chip ID: 0x%06X\n"), stub_ts, ESP.getFlashChipId());
+    ptr+=snprintf_P(ptr,64,PSTR("%s[INIT] Flash speed: %u Hz\n"), stub_ts, ESP.getFlashChipSpeed());
+    ptr+=snprintf_P(ptr,64,PSTR("%s[INIT] Flash mode: %s\n"), stub_ts, mode == FM_QIO ? "QIO" : mode == FM_QOUT ? "QOUT" : mode == FM_DIO ? "DIO" : mode == FM_DOUT ? "DOUT" : "UNKNOWN");
+    *ptr = (char)0;
+    DEBUG_MSG_P(PSTR("\n%s\n"),buf);
 
     _info_print_memory_layout_line("Flash size (CHIP)", ESP.getFlashChipRealSize(), true);
     _info_print_memory_layout_line("Flash size (SDK)", ESP.getFlashChipSize(), true);
@@ -286,8 +308,8 @@ void info() {
     _info_print_memory_layout_line("Reserved", 4 * SPI_FLASH_SEC_SIZE);
     DEBUG_MSG_P(PSTR("\n"));
 
-    DEBUG_MSG_P(PSTR("[INIT] EEPROM sectors: %s\n"), (char *) eepromSectors().c_str());
-    DEBUG_MSG_P(PSTR("\n"));
+    DEBUG_MSG_P(PSTR("[INIT] EEPROM sectors: %s\n\n"), (char *) eepromSectors().c_str());
+    //DEBUG_MSG_P(PSTR("\n"));
 
     // -------------------------------------------------------------------------
 
@@ -300,11 +322,11 @@ void info() {
             DEBUG_MSG_P(PSTR("[INIT]        block size: %8u bytes\n"), fs_info.blockSize);
             DEBUG_MSG_P(PSTR("[INIT]        page size:  %8u bytes\n"), fs_info.pageSize);
             DEBUG_MSG_P(PSTR("[INIT]        max files:  %8u\n"), fs_info.maxOpenFiles);
-            DEBUG_MSG_P(PSTR("[INIT]        max length: %8u\n"), fs_info.maxPathLength);
+            DEBUG_MSG_P(PSTR("[INIT]        max length: %8u\n\n"), fs_info.maxPathLength);
         } else {
-            DEBUG_MSG_P(PSTR("[INIT] No SPIFFS partition\n"));
+            DEBUG_MSG_P(PSTR("[INIT] No SPIFFS partition\n\n"));
         }
-        DEBUG_MSG_P(PSTR("\n"));
+        //DEBUG_MSG_P(PSTR("\n"));
     #endif
 
     // -------------------------------------------------------------------------
@@ -314,8 +336,8 @@ void info() {
     #if SENSOR_SUPPORT
         DEBUG_MSG_P(PSTR("[INIT] SENSORS: %s\n"), getEspurnaSensors().c_str());
     #endif // SENSOR_SUPPORT
-    DEBUG_MSG_P(PSTR("[INIT] WEBUI IMAGE CODE: %u\n"), WEBUI_IMAGE);
-    DEBUG_MSG_P(PSTR("\n"));
+    DEBUG_MSG_P(PSTR("[INIT] WEBUI IMAGE CODE: %u\n\n"), WEBUI_IMAGE);
+    //DEBUG_MSG_P(PSTR("\n"));
 
     // -------------------------------------------------------------------------
 
@@ -333,13 +355,13 @@ void info() {
     int Vcc = custom_getVcc(ADC_MODE_VALUE);
     DEBUG_MSG_P(PSTR("[MAIN] Power: %s \n"), (Vcc==(-1) ? "Unknown" : String(Vcc).c_str()));
 
-    DEBUG_MSG_P(PSTR("[INIT] Power saving delay value: %lu ms\n"), systemLoopDelay());
+    DEBUG_MSG_P(PSTR("[INIT] Power saving delay value: %lu ms\n\n"), systemLoopDelay());
 
     #if SYSTEM_CHECK_ENABLED
-        if (!systemCheck()) DEBUG_MSG_P(PSTR("\n[INIT] Device is in SAFE MODE\n"));
+        if (!systemCheck()) DEBUG_MSG_P(PSTR("\n[INIT] Device is in SAFE MODE\n\n"));
     #endif
 
-    DEBUG_MSG_P(PSTR("\n"));
+    //DEBUG_MSG_P(PSTR("\n"));
 
 }
 
