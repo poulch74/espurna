@@ -256,47 +256,31 @@ void _info_print_memory_layout_line(const char * name, unsigned long bytes) {
 }
 
 void info() {
-/*
-    DEBUG_MSG_P(PSTR("\n\n"));
-    DEBUG_MSG_P(PSTR("[INIT] %s %s\n"), (char *) APP_NAME, (char *) APP_VERSION);
-    DEBUG_MSG_P(PSTR("[INIT] %s\n"), (char *) APP_AUTHOR);
-    DEBUG_MSG_P(PSTR("[INIT] %s\n\n"), (char *) APP_WEBSITE);
-    DEBUG_MSG_P(PSTR("[INIT] CPU chip ID: 0x%06X\n"), ESP.getChipId());
-    DEBUG_MSG_P(PSTR("[INIT] CPU frequency: %u MHz\n"), ESP.getCpuFreqMHz());
-    DEBUG_MSG_P(PSTR("[INIT] SDK version: %s\n"), ESP.getSdkVersion());
-    DEBUG_MSG_P(PSTR("[INIT] Core version: %s\n"), getCoreVersion().c_str());
-    DEBUG_MSG_P(PSTR("[INIT] Core revision: %s\n"), getCoreRevision().c_str());
-    DEBUG_MSG_P(PSTR("\n"));
-*/
-    char buf[512];
 
-    char *ptr = buf;
-    ptr+=snprintf_P(ptr,64,PSTR("%s[INIT] %s %s\n"), stub_ts,(char *) APP_NAME, (char *) APP_VERSION);
-    ptr+=snprintf_P(ptr,64,PSTR("%s[INIT] %s\n"), stub_ts,(char *) APP_AUTHOR);
-    ptr+=snprintf_P(ptr,64,PSTR("%s[INIT] %s\n\n"), stub_ts, (char *) APP_WEBSITE);
-    ptr+=snprintf_P(ptr,64,PSTR("%s[INIT] CPU chip ID: 0x%06X\n"), stub_ts, ESP.getChipId());
-    ptr+=snprintf_P(ptr,64,PSTR("%s[INIT] CPU frequency: %u MHz\n"), stub_ts, ESP.getCpuFreqMHz());
-    ptr+=snprintf_P(ptr,64,PSTR("%s[INIT] SDK version: %s\n"), stub_ts, ESP.getSdkVersion());
-    ptr+=snprintf_P(ptr,64,PSTR("%s[INIT] Core version: %s\n"), stub_ts, getCoreVersion().c_str());
-         snprintf_P(ptr,64,PSTR("%s[INIT] Core revision: %s\n"), stub_ts, getCoreRevision().c_str());
+    DEBUG_MSG_APPEND_ALLOC(buf,8,64);
 
-    DEBUG_MSG_P(PSTR("\n\n%s\n"),buf);
+    DEBUG_MSG_APPEND_INIT_P(buf);
+    DEBUG_MSG_APPEND_P(buf,PSTR("[INIT] %s %s\n"), (char *) APP_NAME, (char *) APP_VERSION);
+    DEBUG_MSG_APPEND_P(buf,PSTR("[INIT] %s\n"), (char *) APP_AUTHOR);
+    DEBUG_MSG_APPEND_P(buf,PSTR("[INIT] %s\n\n"), (char *) APP_WEBSITE);
+    DEBUG_MSG_APPEND_P(buf,PSTR("[INIT] CPU chip ID: 0x%06X\n"), ESP.getChipId());
+    DEBUG_MSG_APPEND_P(buf,PSTR("[INIT] CPU frequency: %u MHz\n"), ESP.getCpuFreqMHz());
+    DEBUG_MSG_APPEND_P(buf,PSTR("[INIT] SDK version: %s\n"), ESP.getSdkVersion());
+    DEBUG_MSG_APPEND_P(buf,PSTR("[INIT] Core version: %s\n"), getCoreVersion().c_str());
+    DEBUG_MSG_APPEND_P(buf,PSTR("[INIT] Core revision: %s\n"), getCoreRevision().c_str());
+
+    DEBUG_MSG_P(PSTR("%s\n"),buf);
 
     // -------------------------------------------------------------------------
 
     FlashMode_t mode = ESP.getFlashChipMode();
-/*    
-    DEBUG_MSG_P(PSTR("[INIT] Flash chip ID: 0x%06X\n"), ESP.getFlashChipId());
-    DEBUG_MSG_P(PSTR("[INIT] Flash speed: %u Hz\n"), ESP.getFlashChipSpeed());
-    DEBUG_MSG_P(PSTR("[INIT] Flash mode: %s\n"), mode == FM_QIO ? "QIO" : mode == FM_QOUT ? "QOUT" : mode == FM_DIO ? "DIO" : mode == FM_DOUT ? "DOUT" : "UNKNOWN");
-    DEBUG_MSG_P(PSTR("\n"));
-*/
-    ptr = buf;
-    ptr+=snprintf_P(ptr,64,PSTR("%s[INIT] Flash chip ID: 0x%06X\n"), stub_ts, ESP.getFlashChipId());
-    ptr+=snprintf_P(ptr,64,PSTR("%s[INIT] Flash speed: %u Hz\n"), stub_ts, ESP.getFlashChipSpeed());
-    ptr+=snprintf_P(ptr,64,PSTR("%s[INIT] Flash mode: %s\n"), stub_ts, mode == FM_QIO ? "QIO" : mode == FM_QOUT ? "QOUT" : mode == FM_DIO ? "DIO" : mode == FM_DOUT ? "DOUT" : "UNKNOWN");
-    *ptr = (char)0;
-    DEBUG_MSG_P(PSTR("\n%s\n"),buf);
+
+    DEBUG_MSG_APPEND_INIT_P(buf);
+    DEBUG_MSG_APPEND_P(buf,PSTR("[INIT] Flash chip ID: 0x%06X\n"), ESP.getFlashChipId());
+    DEBUG_MSG_APPEND_P(buf,PSTR("[INIT] Flash speed: %u Hz\n"), ESP.getFlashChipSpeed());
+    DEBUG_MSG_APPEND_P(buf,PSTR("[INIT] Flash mode: %s\n"), mode == FM_QIO ? "QIO" : mode == FM_QOUT ? "QOUT" : mode == FM_DIO ? "DIO" : mode == FM_DOUT ? "DOUT" : "UNKNOWN");
+
+    DEBUG_MSG_P(PSTR("%s\n"),buf);
 
     _info_print_memory_layout_line("Flash size (CHIP)", ESP.getFlashChipRealSize(), true);
     _info_print_memory_layout_line("Flash size (SDK)", ESP.getFlashChipSize(), true);
@@ -342,27 +326,27 @@ void info() {
     // -------------------------------------------------------------------------
 
     unsigned char reason = resetReason();
+    char buffer[32];
     if (reason > 0) {
-        char buffer[32];
         strcpy_P(buffer, custom_reset_string[reason-1]);
-        DEBUG_MSG_P(PSTR("[INIT] Last reset reason: %s\n"), buffer);
     } else {
-        DEBUG_MSG_P(PSTR("[INIT] Last reset reason: %s\n"), (char *) ESP.getResetReason().c_str());
+        strcpy(buffer, (char *) ESP.getResetReason().c_str());
     }
 
-    DEBUG_MSG_P(PSTR("[INIT] Settings size: %u bytes\n"), settingsSize());
-    DEBUG_MSG_P(PSTR("[INIT] Free heap: %u bytes\n"), getFreeHeap());
     int Vcc = custom_getVcc(ADC_MODE_VALUE);
-    DEBUG_MSG_P(PSTR("[MAIN] Power: %s \n"), (Vcc==(-1) ? "Unknown" : String(Vcc).c_str()));
 
-    DEBUG_MSG_P(PSTR("[INIT] Power saving delay value: %lu ms\n\n"), systemLoopDelay());
+    DEBUG_MSG_APPEND_INIT_P(buf);
+    DEBUG_MSG_APPEND_P(buf,PSTR("[INIT] Last reset reason: %s\n"), buffer);
+    DEBUG_MSG_APPEND_P(buf,PSTR("[INIT] Settings size: %u bytes\n"), settingsSize());
+    DEBUG_MSG_APPEND_P(buf,PSTR("[INIT] Free heap: %u bytes\n"), getFreeHeap());
+    DEBUG_MSG_APPEND_P(buf,PSTR("[MAIN] Power: %s \n"), (Vcc==(-1) ? "Unknown" : String(Vcc).c_str()));
+    DEBUG_MSG_APPEND_P(buf,PSTR("[INIT] Power saving delay value: %lu ms\n"), systemLoopDelay());
 
     #if SYSTEM_CHECK_ENABLED
-        if (!systemCheck()) DEBUG_MSG_P(PSTR("\n[INIT] Device is in SAFE MODE\n\n"));
+        if (!systemCheck()) DEBUG_MSG_APPEND_P(buf,PSTR("\n[INIT] Device is in SAFE MODE\n"));
     #endif
 
-    //DEBUG_MSG_P(PSTR("\n"));
-
+    DEBUG_MSG_P(PSTR("%s\n"),buf);
 }
 
 // -----------------------------------------------------------------------------

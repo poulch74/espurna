@@ -100,6 +100,51 @@ void _debugSend(char * message) {
 
 // -----------------------------------------------------------------------------
 
+void debugAppend(char **ptr,int sz, bool reset, const char * format, ...) {
+
+    static bool first = true;
+    if(reset) { first = true; return; }
+    char timestamp[10] = {0};
+    int tslen= 0;
+    #if DEBUG_ADD_TIMESTAMP
+        if(!first)  {
+            tslen=snprintf_P(*ptr, 10, PSTR("[......] "));
+            *ptr+=tslen;
+        } else {
+            first = false;
+        }
+    #endif
+    va_list args;
+    va_start(args, format);
+    *ptr+=ets_vsnprintf(*ptr, sz-tslen, format, args);
+    va_end(args);
+    *(*ptr) = (char)0;
+}
+
+void debugAppend_P(char **ptr,int sz, bool reset, PGM_P format_P, ...) {
+
+    static bool first = true;
+    if(reset) { first = true; return; }
+
+    char format[strlen_P(format_P)+1];
+    memcpy_P(format, format_P, sizeof(format));
+
+    int tslen= 0;
+    #if DEBUG_ADD_TIMESTAMP
+        if(!first)  {
+            tslen=snprintf_P(*ptr, 10, PSTR("[......] "));
+            *ptr+=tslen;
+        } else {
+            first = false;
+        }
+    #endif
+    va_list args;
+    va_start(args, format_P);
+    *ptr+=ets_vsnprintf(*ptr, sz-tslen, format, args);
+    va_end(args);
+    *(*ptr) = (char)0;
+}
+
 void debugSend(const char * format, ...) {
 
     va_list args;

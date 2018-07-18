@@ -114,35 +114,52 @@ std::vector<String> _settingsKeys() {
 
 void _settingsHelpCommand() {
 
-    // Get sorted list of commands
-    std::vector<String> commands;
-    unsigned char size = embedis.getCommandCount();
-    DEBUG_MSG_P(PSTR("Available commands:\n"));
-    for (unsigned int i=0; i<size; i++) {
+    char *buf;
+    do {
+        // Get sorted list of commands
+        std::vector<String> commands;
+        unsigned char size = embedis.getCommandCount();
+        int maxl = 0;
+        int total_len = 0;
+        DEBUG_MSG_P(PSTR("Available commands:\n"));
+        for (unsigned int i=0; i<size; i++) {
 
-        String command = embedis.getCommandName(i);
-        bool inserted = false;
-        for (unsigned char j=0; j<commands.size(); j++) {
-            // Check if we have to insert it before the current element
-            if (commands[j].compareTo(command) > 0) {
-                commands.insert(commands.begin() + j, command);
-                inserted = true;
-                break;
+            String command = embedis.getCommandName(i);
+            int l = command.length();
+            total_len +=l;
+            if(l>maxl) maxl=l;
+            bool inserted = false;
+            for (unsigned char j=0; j<commands.size(); j++) {
+                // Check if we have to insert it before the current element
+                if (commands[j].compareTo(command) > 0) {
+                    commands.insert(commands.begin() + j, command);
+                    inserted = true;
+                    break;
+                }
+
             }
+
+            // If we could not insert it, just push it at the end
+            if (!inserted) commands.push_back(command);
 
         }
 
-        // If we could not insert it, just push it at the end
-        if (!inserted) commands.push_back(command);
+        // Output the list
+        // some code like DEBUG_MSG_APPEND_ALLOC(buf) but with dynamic size new/delete
+        int buf_l = maxl+15;
+        buf = new char[total_len+15*commands.size()];
+        char *ptr_buf;
 
-    }
-    // Output the list
-    String list;
-    String str_ts(stub_ts);
-    for (unsigned char i=0; i<commands.size(); i++) {
-        list += commands[i] + "\n" + str_ts + "> ";
-    }
-    DEBUG_MSG_P(PSTR("> %s----------\n"), list.c_str());
+        DEBUG_MSG_APPEND_INIT_P(buf);
+        for (unsigned char i=0; i<commands.size(); i++) {
+            DEBUG_MSG_APPEND_P(buf,"> %s\n",commands[i].c_str());    
+        }
+        
+    } while(0);
+
+    DEBUG_MSG_P("%s\n", buf);
+    DEBUG_MSG_P(PSTR("[INIT] Free heap: %u bytes\n"), getFreeHeap());
+    delete[] buf;
 }
 
 void _settingsKeysCommand() {
@@ -296,12 +313,6 @@ void _settingsInitCommands() {
         DEBUG_MSG_P(PSTR("Uptime: %d seconds\n"), getUptime());
         DEBUG_MSG_P(PSTR("+OK\n"));
     });
-
-        settingsRegisterCommand(F("UPTIMEee"), [](Embedis* e) {
-        DEBUG_MSG_P(PSTR("Uptime: %d seconds\n"), getUptime());
-        DEBUG_MSG_P(PSTR("+OK\n"));
-    });
-
 
 }
 

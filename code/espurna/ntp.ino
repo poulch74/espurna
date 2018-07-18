@@ -108,7 +108,7 @@ void _ntpUpdate() {
             if(_rtc_update) setTime_rtc(t);
         #endif
 
-        sun.Calc(2018,7,13,srRISE); // month,date - january=1 ;  t= minutes past midnight of sunrise (6 am would be 360)
+        sun.Calc(2018,7,18,srRISE); // month,date - january=1 ;  t= minutes past midnight of sunrise (6 am would be 360)
         tmElements_t tm;
         breakTime(t, tm);
         tm.Hour = sun.getHr();
