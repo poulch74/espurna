@@ -2,7 +2,7 @@
 // SENSORS - General data
 // =============================================================================
 
-#define SENSOR_DEBUG                        0               // Debug sensors
+#define SENSOR_DEBUG                        1               // Debug sensors
 
 #define SENSOR_READ_INTERVAL                6               // Read data from sensors every 6 seconds
 #define SENSOR_READ_MIN_INTERVAL            6               // Minimum read interval
@@ -602,6 +602,12 @@
 #define V9261F_POWER_FACTOR             153699.0
 #define V9261F_RPOWER_FACTOR            V9261F_CURRENT_FACTOR
 
+
+#ifndef SUNRISE_SUPPORT
+#define SUNRISE_SUPPORT               0
+#endif
+
+
 // =============================================================================
 // Sensor helpers configuration - can't move to dependencies.h
 // =============================================================================
@@ -633,7 +639,8 @@
     SHT3X_I2C_SUPPORT || \
     SI7021_SUPPORT || \
     TMP3X_SUPPORT || \
-    V9261F_SUPPORT \
+    V9261F_SUPPORT ||\
+    SUNRISE_SUPPORT \
 )
 #endif
 
@@ -804,5 +811,11 @@
     #include <SoftwareSerial.h>
     #include "../sensors/V9261FSensor.h"
 #endif
+
+#if SUNRISE_SUPPORT
+//    #include <SoftwareSerial.h>
+    #include "../sensors/SunriseSensor.h"
+#endif
+
 
 #endif // SENSOR_SUPPORT

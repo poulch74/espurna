@@ -26,10 +26,12 @@
 #include "version.h"
 #include "types.h"
 #include "arduino.h"
+
 #include "hardware.h"
 #include "defaults.h"
 #include "general.h"
 #include "prototypes.h"
+
 #include "sensors.h"
 #include "rtc.h"
 #include "dependencies.h"

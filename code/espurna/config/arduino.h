@@ -129,7 +129,7 @@
 //#define AM2320_SUPPORT         1
 //#define ANALOG_SUPPORT         1
 //#define BH1750_SUPPORT         1
-#define BMX280_SUPPORT         1
+//#define BMX280_SUPPORT         1
 //#define CSE7766_SUPPORT        1
 //#define DALLAS_SUPPORT         1
 //#define DHT_SUPPORT            1
@@ -151,3 +151,4 @@
 //#define TMP3X_SUPPORT          1
 //#define V9261F_SUPPORT         1
 //#define GEIGER_SUPPORT         1
+//#define SUNRISE_SUPPORT        1

@@ -581,6 +581,15 @@ void _sensorLoad() {
     }
     #endif
 
+    #if SUNRISE_SUPPORT
+    {
+        SunriseSensor * sensor = new SunriseSensor();
+        sensor->setRelayBinding(1);
+        _sensors.push_back(sensor);
+    }
+    #endif
+
+
 }
 
 void _sensorCallback(unsigned char i, unsigned char type, const char * payload) {

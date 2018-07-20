@@ -1348,10 +1348,10 @@
 
     // DS18B20
     #ifndef DALLAS_SUPPORT
-    #define DALLAS_SUPPORT             	1
+    #define DALLAS_SUPPORT                1
     #endif
-    #define DALLAS_PIN                 	2
-    #define DALLAS_UPDATE_INTERVAL     	5000
+    #define DALLAS_PIN                    2
+    #define DALLAS_UPDATE_INTERVAL        5000
     #define TEMPERATURE_MIN_CHANGE      1.0
 
 // -----------------------------------------------------------------------------
@@ -1740,21 +1740,21 @@
 #elif defined(HEYGO_HY02)
 
     // Info
-    #define MANUFACTURER		"HEYGO"
-    #define DEVICE				"HY02"
+    #define MANUFACTURER      "HEYGO"
+    #define DEVICE            "HY02"
 
     // Buttons
-    #define BUTTON1_PIN			13
-    #define BUTTON1_MODE		BUTTON_PUSHBUTTON | BUTTON_DEFAULT_HIGH
-    #define BUTTON1_RELAY		1
+    #define BUTTON1_PIN       13
+    #define BUTTON1_MODE      BUTTON_PUSHBUTTON | BUTTON_DEFAULT_HIGH
+    #define BUTTON1_RELAY     1
 
     // Relays
-    #define RELAY1_PIN			12
-    #define RELAY1_TYPE			RELAY_TYPE_NORMAL
+    #define RELAY1_PIN        12
+    #define RELAY1_TYPE       RELAY_TYPE_NORMAL
 
     // LEDs
-    #define LED1_PIN			4
-    #define LED1_PIN_INVERSE	0
+    #define LED1_PIN       4
+    #define LED1_PIN_INVERSE  0
 
 // -----------------------------------------------------------------------------
 // Maxcio W-US002S
@@ -1763,29 +1763,29 @@
 #elif defined(MAXCIO_WUS002S)
 
     // Info
-    #define MANUFACTURER		"MAXCIO"
-    #define DEVICE				"WUS002S"
+    #define MANUFACTURER      "MAXCIO"
+    #define DEVICE            "WUS002S"
 
     // Buttons
-    #define BUTTON1_PIN			2
-    #define BUTTON1_MODE		BUTTON_PUSHBUTTON | BUTTON_DEFAULT_HIGH
-    #define BUTTON1_RELAY		1
+    #define BUTTON1_PIN       2
+    #define BUTTON1_MODE      BUTTON_PUSHBUTTON | BUTTON_DEFAULT_HIGH
+    #define BUTTON1_RELAY     1
 
     // Relays
-    #define RELAY1_PIN			13
-    #define RELAY1_TYPE			RELAY_TYPE_NORMAL
+    #define RELAY1_PIN        13
+    #define RELAY1_TYPE       RELAY_TYPE_NORMAL
 
     // LEDs
-    #define LED1_PIN			3
-    #define LED1_PIN_INVERSE	0
+    #define LED1_PIN       3
+    #define LED1_PIN_INVERSE  0
 
     // HLW8012
     #ifndef HLW8012_SUPPORT
-    #define HLW8012_SUPPORT		1
+    #define HLW8012_SUPPORT      1
     #endif
-    #define HLW8012_SEL_PIN		12
-    #define HLW8012_CF1_PIN		5
-    #define HLW8012_CF_PIN		4
+    #define HLW8012_SEL_PIN      12
+    #define HLW8012_CF1_PIN      5
+    #define HLW8012_CF_PIN    4
 
     #define HLW8012_CURRENT_R               0.002            // Current resistor
     #define HLW8012_VOLTAGE_R_UP            ( 2 * 1000000 )  // Upstream voltage resistor
@@ -1797,21 +1797,21 @@
 #elif defined(YIDIAN_XSSSA05)
 
     // Info
-    #define MANUFACTURER		"YIDIAN"
-    #define DEVICE				"XSSSA05"
+    #define MANUFACTURER      "YIDIAN"
+    #define DEVICE            "XSSSA05"
 
     // Buttons
-    #define BUTTON1_PIN			13
-    #define BUTTON1_MODE		BUTTON_PUSHBUTTON
-    #define BUTTON1_RELAY		1
+    #define BUTTON1_PIN       13
+    #define BUTTON1_MODE      BUTTON_PUSHBUTTON
+    #define BUTTON1_RELAY     1
 
     // Relays
-    #define RELAY1_PIN			12
-    #define RELAY1_TYPE			RELAY_TYPE_NORMAL
+    #define RELAY1_PIN        12
+    #define RELAY1_TYPE       RELAY_TYPE_NORMAL
 
     // LEDs
-    #define LED1_PIN			4
-    #define LED1_PIN_INVERSE	0
+    #define LED1_PIN       4
+    #define LED1_PIN_INVERSE  0
 
     // HLW8012
     #ifndef HLW8012_SUPPORT
@@ -2654,6 +2654,9 @@
     #define RTC_PROVIDER             RTC_PROVIDER_DS3231     // for test
     #define RTC_RECOVERY_CNT         3                      // 0 no recovery
     #define RTC_NTP_SYNC_ENA         1                      // 0 rtc not synced with ntp
+
+   // SUNRISE support
+   #define SUNRISE_SUPPORT           1
 
 #endif
 
