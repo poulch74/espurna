@@ -14,6 +14,11 @@
 #include <NtpClientLib.h>
 #include "../libs/sunrise.h"
 
+extern "C" {
+    #include "../libs/fs_math.h"
+}
+
+
 bool ntpSynced();
 String ntpDateTime(time_t t);
 String ntpDateTime();
@@ -65,7 +70,7 @@ class SunriseSensor : public BaseSensor {
 
         // Type for slot # index
         unsigned char type(unsigned char index) {
-            if (index == 0) return MAGNITUDE_DIGITAL;
+            if (index == 0) return MAGNITUDE_ANALOG;
             if (index == 1) return MAGNITUDE_ANALOG;
             if (index == 2) return MAGNITUDE_ANALOG;
             return MAGNITUDE_NONE;
@@ -77,77 +82,63 @@ class SunriseSensor : public BaseSensor {
 
         void pre()
         {
-            if(!ntpSynced()) {
-                _error = SENSOR_ERROR_OUT_OF_RANGE;
-                return;
-            }
-
-            time_t curt = now();
-
-            if(_first)
-            {
-                DEBUG_MSG(("[SENSOR] Sunrise PRE success!! "));
-
-                _first = false;
-                today = previousMidnight(curt);
-                _calculate_sunrise();
-                if(curt>=rise_time && curt<set_time) state =1;
-                else state = 0;
-                if (_relayID > 0) {
-                    int status = _relayMode ? (!state):state;
-                    DEBUG_MSG(("[SENSOR] First set relay  : %ds\n"), status);
-                    relayStatus(_relayID - 1, status);
-                }
-            } else {
+            _error = SENSOR_ERROR_OUT_OF_RANGE;
+            if(ntpSynced()) {
                 
-                int curstate;
+                _error = SENSOR_ERROR_OK;
+                time_t curt = now();
 
-                if((curt>=rise_time) && (curt<set_time)) curstate =1; //day
-                else curstate = 0; //night
-
-                if(state==1 && curstate==0) { // set occure so night to next day.switch to next today and recalc next rise/set times
-                    today = nextMidnight(today);
+                if(_first) {
+                    _first = false;
+                    today = previousMidnight(curt);
                     _calculate_sunrise();
-                }
+                    if(curt>=rise_time && curt<set_time) state =1;
+                    else state = 0;
 
-                if(curstate!=state) {
-                    state = curstate;
-                    if (_relayID > 0) {
+                    if(_relayID > 0) {
                         int status = _relayMode ? (!state):state;
-                        DEBUG_MSG(("[SENSOR] Switch relay  : %ds\n"), status);
+                        DEBUG_MSG(("[SENSOR] First set relay  : %d %d \n"), status, int(fs_cos(3.1415/4)*1000));
                         relayStatus(_relayID - 1, status);
                     }
+
+                } else {
+                
+                    int curstate;
+
+                    if((curt>=rise_time) && (curt<set_time)) curstate =1; //day
+                    else curstate = 0; //night
+
+                    if(state==1 && curstate==0) { // set occure so night to next day.switch to next today and recalc next rise/set times
+                        today = nextMidnight(today);
+                        _calculate_sunrise();
+                    }
+
+                    if(curstate!=state) {
+                        state = curstate;
+                        if(_relayID > 0) {
+                            int status = _relayMode ? (!state):state;
+                            DEBUG_MSG(("[SENSOR] Switch relay  : %d\n"), status);
+                            relayStatus(_relayID - 1, status);
+                        }
+                    }
+
                 }
-                DEBUG_MSG(("[SENSOR] Sunrise tick check!! "));
             }
-            
         }
 
         // Current value for slot # index
         double value(unsigned char index) {
 
-            if(!ntpSynced()) {
-                _error = SENSOR_ERROR_OUT_OF_RANGE;
-                return 0;
+            time_t tt = rise_time;
+            _error = SENSOR_ERROR_OUT_OF_RANGE;
+            if (ntpSynced() && (index<3)) {
+                _error = SENSOR_ERROR_OK;
+                if(index == 0) return state;
+                if(index > 1) tt = set_time;
             }
-
-            DEBUG_MSG(("[SENSOR] Sunrise value check!! "));
-
-            if( index==0 ) {
-                return state;
-            }
-
-            if(index == 1) {
-                tmElements_t tm;
-                breakTime(rise_time, tm);
-                return tm.Hour*100+tm.Minute;
-            }
-
-            if(index == 2) {
-                tmElements_t tm;
-                breakTime(set_time, tm);
-                return tm.Hour*100+tm.Minute;
-            }
+            tmElements_t tm;
+            breakTime(tt, tm);
+            return tm.Hour*100+tm.Minute;
         }
 
     protected:

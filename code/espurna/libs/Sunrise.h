@@ -6,26 +6,26 @@
 
 class Sunrise{
   public:
-	Sunrise(double, double, double);
-	void Actual() {coszenith=-0.01454; }
-	void Civil() { coszenith=-0.10453; }
-	void Nautical(){ coszenith=-0.20791; }
-	void Astronomical(){ coszenith=-0.30901; }
+	Sunrise(float, float, float);
+	void Actual() {coszenith=float(-0.01454); }
+	void Civil() { coszenith=float(-0.10453); }
+	void Nautical(){ coszenith=float(-0.20791); }
+	void Astronomical(){ coszenith=float(-0.30901); }
 	unsigned char getHr() { return theHour; }
 	unsigned char getMin(){ return theMinute; }
 	
    int Calc(int,unsigned char ,unsigned char, int);
 
   private:
-	double adjust(double val, double bounds)
+	float adjust(float val, float bounds)
 	{
-		double v = val;
+		float v = val;
 		while(v>bounds) v-=bounds;
 		while(v<0) v+=bounds;
 		return v;
 	}
 
-	double sinlat,coslat,lngHour, coszenith, tz;
+	float sinlat,coslat,lngHour, coszenith, tz;
 	unsigned char  theHour,theMinute;
 };
 
