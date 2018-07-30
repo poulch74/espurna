@@ -108,11 +108,11 @@ void _ntpUpdate() {
             if(_rtc_update) setTime_rtc(t);
         #endif
 
-        sun.Calc(2018,7,18,srRISE); // month,date - january=1 ;  t= minutes past midnight of sunrise (6 am would be 360)
+        sun.calc(2018,7,18,official,srRISE); // month,date - january=1 ;  t= minutes past midnight of sunrise (6 am would be 360)
         tmElements_t tm;
         breakTime(t, tm);
-        tm.Hour = sun.getHr();
-        tm.Minute=sun.getMin();
+        tm.Hour = sun.get_hr();
+        tm.Minute=sun.get_min();
         time_t st = makeTime(tm); 
         DEBUG_MSG_P(PSTR("[NTP] Sunrise Time  : %s\n"), (char *) ntpDateTime(st).c_str());
         DEBUG_MSG_P(PSTR("[NTP] UTC Time  : %s\n"), (char *) ntpDateTime(ntpLocal2UTC(t)).c_str());

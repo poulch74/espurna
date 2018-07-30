@@ -18,11 +18,11 @@ extern "C" {
     #include "../libs/fs_math.h"
 }
 
-
+// forward decl
 bool ntpSynced();
 String ntpDateTime(time_t t);
-String ntpDateTime();
-time_t ntpLocal2UTC(time_t local);
+//String ntpDateTime();
+//time_t ntpLocal2UTC(time_t local);
 bool relayStatus(unsigned char id, bool status);
 
 class SunriseSensor : public BaseSensor {
@@ -57,9 +57,11 @@ class SunriseSensor : public BaseSensor {
 
         // Descriptive name of the slot # index
         String slot(unsigned char index) {
+            //return String(names[index]);
+            
             if (index == 0) return String("Day(1)/Night(0) ");
             if (index == 1) return String("Sunrise time (BCD) ");
-            if (index == 2) return String("Sunset time (BCD)" );
+            if (index == 2) return String("Sunset  time (BCD)" );
             return description();
         };
 
@@ -70,10 +72,7 @@ class SunriseSensor : public BaseSensor {
 
         // Type for slot # index
         unsigned char type(unsigned char index) {
-            if (index == 0) return MAGNITUDE_ANALOG;
-            if (index == 1) return MAGNITUDE_ANALOG;
-            if (index == 2) return MAGNITUDE_ANALOG;
-            return MAGNITUDE_NONE;
+            return MAGNITUDE_ANALOG;
         }
 
         void setRelayBinding(unsigned char id) {
@@ -90,14 +89,14 @@ class SunriseSensor : public BaseSensor {
 
                 if(_first) {
                     _first = false;
-                    today = previousMidnight(curt);
+                    today = previousMidnight((curt));
                     _calculate_sunrise();
                     if(curt>=rise_time && curt<set_time) state =1;
                     else state = 0;
 
                     if(_relayID > 0) {
                         int status = _relayMode ? (!state):state;
-                        DEBUG_MSG(("[SENSOR] First set relay  : %d %d \n"), status, int(fs_cos(3.1415/4)*1000));
+                        DEBUG_MSG(("[SENSOR] First set relay  : %d\n"), status);
                         relayStatus(_relayID - 1, status);
                     }
 
@@ -129,16 +128,17 @@ class SunriseSensor : public BaseSensor {
         // Current value for slot # index
         double value(unsigned char index) {
 
-            time_t tt = rise_time;
             _error = SENSOR_ERROR_OUT_OF_RANGE;
+            time_t tt = set_time;
             if (ntpSynced() && (index<3)) {
                 _error = SENSOR_ERROR_OK;
                 if(index == 0) return state;
-                if(index > 1) tt = set_time;
+                if(index == 1) tt = rise_time;
             }
             tmElements_t tm;
             breakTime(tt, tm);
-            return tm.Hour*100+tm.Minute;
+            return tm.Hour*100+tm.Minute; // BCD
+            
         }
 
     protected:
@@ -153,13 +153,13 @@ class SunriseSensor : public BaseSensor {
         void _calculate_sunrise() { // today is midnight today date with cleared time so no checks and clearing unused elements
             tmElements_t tm;
             breakTime(today, tm);
-            sun.Calc(tm.Year,tm.Month,tm.Day,srRISE); // month,date - january=1 ;  t= minutes past midnight of sunrise (6 am would be 360)
-            tm.Hour = sun.getHr();
-            tm.Minute=sun.getMin();
+            sun.calc(tm.Year,tm.Month,tm.Day,official,srRISE); // month,date - january=1 ;  t= minutes past midnight of sunrise (6 am would be 360)
+            tm.Hour = sun.get_hr();
+            tm.Minute=sun.get_min();
             rise_time = makeTime(tm);
-            sun.Calc(tm.Year,tm.Month,tm.Day,srSET); // month,date - january=1 ;  t= minutes past midnight of sunrise (6 am would be 360)
-            tm.Hour = sun.getHr();
-            tm.Minute=sun.getMin();
+            sun.calc(tm.Year,tm.Month,tm.Day,official,srSET); // month,date - january=1 ;  t= minutes past midnight of sunrise (6 am would be 360)
+            tm.Hour = sun.get_hr();
+            tm.Minute=sun.get_min();
             set_time = makeTime(tm);
 
             DEBUG_MSG(("[SENSOR] Today Time  : %s\n"), (char *) ntpDateTime(today).c_str());

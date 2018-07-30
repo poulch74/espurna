@@ -1,32 +1,30 @@
 #ifndef sunrise_h
 #define sunrise_h
 
-#define srRISE 1
-#define srSET  0
+#define srRISE true
+#define srSET  false
 
-class Sunrise{
-  public:
-	Sunrise(float, float, float);
-	void Actual() {coszenith=float(-0.01454); }
-	void Civil() { coszenith=float(-0.10453); }
-	void Nautical(){ coszenith=float(-0.20791); }
-	void Astronomical(){ coszenith=float(-0.30901); }
-	unsigned char getHr() { return theHour; }
-	unsigned char getMin(){ return theMinute; }
+enum Zenith {official, civil, nautical, astronomical };
+
+class Sunrise {
+    public:
+	    Sunrise(float, float, float);
+	    unsigned char get_hr() { return (unsigned char)hr; }
+	    unsigned char get_min(){ return (unsigned char)min; }
 	
-   int Calc(int,unsigned char ,unsigned char, int);
+        int calc(int,unsigned char ,unsigned char, Zenith, bool);
 
-  private:
-	float adjust(float val, float bounds)
-	{
-		float v = val;
-		while(v>bounds) v-=bounds;
-		while(v<0) v+=bounds;
-		return v;
-	}
+    private:
+	    float adjust(float val, float bounds)
+	    {
+		    float v = val;
+		    while(v>bounds) v-=bounds;
+		    while(v<0) v+=bounds;
+		    return v;
+	    }
 
-	float sinlat,coslat,lngHour, coszenith, tz;
-	unsigned char  theHour,theMinute;
+	    float sinlat,coslat,lngHour,lngHour24, coszenith, tz;
+	    int  hr,min;
 };
 
 extern Sunrise sun;
