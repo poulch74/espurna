@@ -113,7 +113,8 @@ int Sunrise::calc(int year, unsigned char  month, unsigned char  day, Zenith zen
    float cosH = (coszenith - (sinDec * sinlat)) / (cosDec * coslat);
 
    // we're in the (ant)arctic and there is no rise(or set) today!
-   if(fs_abs(cosH)>1){ hr=255; return -1; }
+   if(cosH>1.0f){ hr=255; return -1; } // polar night
+   if(cosH<(-1.0f)){ hr=255; return -2; } // polar day
     
    float ha=fs_acos(cosH)*_180PI; 
 
@@ -129,15 +130,13 @@ int Sunrise::calc(int year, unsigned char  month, unsigned char  day, Zenith zen
    min=(int)(minutes-hr*60);
 
 // for test
-/*
+
     if(rs) { //rise
-        theHour=17;
-        theMinute=01;
+    minutes=(int)(50+19*60);
     } else { // set
-        theHour=17;
-        theMinute=03;
+    minutes=(int)(53+19*60);
     }
-*/  
+  
    return minutes;
 }
 

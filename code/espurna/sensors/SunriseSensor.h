@@ -47,7 +47,8 @@ class SunriseSensor : public BaseSensor {
         // Initialization method, must be idempotent
         void begin() {
             _ready = true;
-            _first = true;
+            _update = true;
+            _state = -1;
         }
 
         // Descriptive name of the sensor
@@ -79,61 +80,15 @@ class SunriseSensor : public BaseSensor {
             _relayID = id;
         }
 
-        void pre()
-        {
-            _error = SENSOR_ERROR_OUT_OF_RANGE;
-            if(ntpSynced()) {
-                
-                _error = SENSOR_ERROR_OK;
-                time_t curt = now();
-
-                if(_first) {
-                    _first = false;
-                    today = previousMidnight((curt));
-                    _calculate_sunrise();
-                    if(curt>=rise_time && curt<set_time) state =1;
-                    else state = 0;
-
-                    if(_relayID > 0) {
-                        int status = _relayMode ? (!state):state;
-                        DEBUG_MSG(("[SENSOR] First set relay  : %d\n"), status);
-                        relayStatus(_relayID - 1, status);
-                    }
-
-                } else {
-                
-                    int curstate;
-
-                    if((curt>=rise_time) && (curt<set_time)) curstate =1; //day
-                    else curstate = 0; //night
-
-                    if(state==1 && curstate==0) { // set occure so night to next day.switch to next today and recalc next rise/set times
-                        today = nextMidnight(today);
-                        _calculate_sunrise();
-                    }
-
-                    if(curstate!=state) {
-                        state = curstate;
-                        if(_relayID > 0) {
-                            int status = _relayMode ? (!state):state;
-                            DEBUG_MSG(("[SENSOR] Switch relay  : %d\n"), status);
-                            relayStatus(_relayID - 1, status);
-                        }
-                    }
-
-                }
-            }
-        }
-
         // Current value for slot # index
         double value(unsigned char index) {
 
             _error = SENSOR_ERROR_OUT_OF_RANGE;
-            time_t tt = set_time;
+            time_t tt = _set_time;
             if (ntpSynced() && (index<3)) {
                 _error = SENSOR_ERROR_OK;
-                if(index == 0) return state;
-                if(index == 1) tt = rise_time;
+                if(index == 0) return _state;
+                if(index == 1) tt = _rise_time;
             }
             tmElements_t tm;
             breakTime(tt, tm);
@@ -141,31 +96,76 @@ class SunriseSensor : public BaseSensor {
             
         }
 
+        void pre()
+        {
+            _error = SENSOR_ERROR_OUT_OF_RANGE;
+            while(ntpSynced()) {
+                
+                _error = SENSOR_ERROR_OK;
+                time_t curt = now();
+
+                if(_update) {
+                    _update = false;
+                    _today = previousMidnight((curt));
+                    _calculate_sunrise();
+                    DEBUG_MSG(("[SENSOR] update sunrise time \n"));
+                }
+
+                if(curt>=nextMidnight(_today)) {_update = true; continue;}
+
+                _check_state(curt);
+                break;
+            }                
+        }
+
+
+
     protected:
-        time_t rise_time;
-        time_t set_time;
-        time_t today;
-        bool _first;
-        int state;
+        time_t _rise_time;
+        time_t _set_time;
+        time_t _today;
+        int _state;
+        int _polar;
+        bool _update;
         unsigned char _relayID;
         int _relayMode; // 0 off on  night 1  on on night
 
         void _calculate_sunrise() { // today is midnight today date with cleared time so no checks and clearing unused elements
             tmElements_t tm;
-            breakTime(today, tm);
-            sun.calc(tm.Year,tm.Month,tm.Day,official,srRISE); // month,date - january=1 ;  t= minutes past midnight of sunrise (6 am would be 360)
-            tm.Hour = sun.get_hr();
-            tm.Minute=sun.get_min();
-            rise_time = makeTime(tm);
-            sun.calc(tm.Year,tm.Month,tm.Day,official,srSET); // month,date - january=1 ;  t= minutes past midnight of sunrise (6 am would be 360)
-            tm.Hour = sun.get_hr();
-            tm.Minute=sun.get_min();
-            set_time = makeTime(tm);
+            breakTime(_today, tm);
+            int min = sun.calc(tm.Year,tm.Month,tm.Day,official,srRISE); // month,date - january=1 ;  t= minutes past midnight of sunrise (6 am would be 360)
+            if(min>=0) _rise_time = _today+min*60;
+            min = sun.calc(tm.Year,tm.Month,tm.Day,official,srSET); // month,date - january=1 ;  t= minutes past midnight of sunrise (6 am would be 360)
+            if(min>=0) _set_time = _today+min*60;
+            _polar = min;
 
-            DEBUG_MSG(("[SENSOR] Today Time  : %s\n"), (char *) ntpDateTime(today).c_str());
-            DEBUG_MSG(("[SENSOR] Sunrise Time  : %s\n"), (char *) ntpDateTime(rise_time).c_str());
-            DEBUG_MSG(("[SENSOR] Sunset Time  : %s\n"), (char *) ntpDateTime(set_time).c_str());
+            DEBUG_MSG(("[SENSOR] Today Time  : %s\n"), (char *) ntpDateTime(_today).c_str());
+            DEBUG_MSG(("[SENSOR] Sunrise Time  : %s\n"), (char *) ntpDateTime(_rise_time).c_str());
+            DEBUG_MSG(("[SENSOR] Sunset Time  : %s\n"), (char *) ntpDateTime(_set_time).c_str());
         }
+
+        void _check_state(time_t curt) 
+        {
+            int curstate;
+            // -1 night -2 day polar
+            if(_polar<0) {
+                if(_polar==(-1)) curstate = 0; // night
+                else curstate = 1;  //day
+            } else {
+               if((curt>=_rise_time) && (curt<_set_time)) curstate =1; //day
+               else curstate = 0; //night
+            }                    
+
+            if(curstate!=_state) { // on first call state=-1, so always init relay if binded
+                _state = curstate;
+                if(_relayID > 0) {
+                    int status = _relayMode ? (!_state):_state;
+                    DEBUG_MSG(("[SENSOR] Switch relay  : %d\n"), status);
+                    relayStatus(_relayID - 1, status);
+                }
+            }
+        }
+
 
 };
 
