@@ -14,16 +14,11 @@
 #include <NtpClientLib.h>
 #include "../libs/sunrise.h"
 
-extern "C" {
-    #include "../libs/fs_math.h"
-}
-
 // forward decl
 bool ntpSynced();
 String ntpDateTime(time_t t);
-//String ntpDateTime();
-//time_t ntpLocal2UTC(time_t local);
 bool relayStatus(unsigned char id, bool status);
+
 
 class SunriseSensor : public BaseSensor {
 
@@ -36,7 +31,7 @@ class SunriseSensor : public BaseSensor {
         SunriseSensor(): BaseSensor() {
             _count = 3;
             _sensor_id = SENSOR_SUNRISE_ID;
-            _relayID = 0;            
+            _relayID = 0;
         }
 
 
@@ -47,8 +42,17 @@ class SunriseSensor : public BaseSensor {
         // Initialization method, must be idempotent
         void begin() {
             _ready = true;
-            _update = true;
             _state = -1;
+            if(ntpSynced()) {
+                time_t curt = now();
+                _calculate(curt);
+                _check_state(curt);
+
+                DEBUG_MSG(("[SUNRISE] Today Time  : %s\n"), (char *) ntpDateTime(_today).c_str());
+                DEBUG_MSG(("[SUNRISE] Sunrise Time  : %s\n"), (char *) ntpDateTime(_rise_time).c_str());
+                DEBUG_MSG(("[SUNRISE] Sunset Time  : %s\n"), (char *) ntpDateTime(_set_time).c_str());
+            }
+            ss_last = 0;
         }
 
         // Descriptive name of the sensor
@@ -93,55 +97,43 @@ class SunriseSensor : public BaseSensor {
             tmElements_t tm;
             breakTime(tt, tm);
             return tm.Hour*100+tm.Minute; // BCD
-            
         }
 
-        void pre()
+        void tick()
         {
-            _error = SENSOR_ERROR_OUT_OF_RANGE;
-            while(ntpSynced()) {
-                
-                _error = SENSOR_ERROR_OK;
+            unsigned long cm = millis();
+            if((cm-ss_last>=10000) && ntpSynced()) {
+                ss_last = cm;
                 time_t curt = now();
-
-                if(_update) {
-                    _update = false;
-                    _today = previousMidnight((curt));
-                    _calculate_sunrise();
-                    DEBUG_MSG(("[SENSOR] update sunrise time \n"));
-                }
-
-                if(curt>=nextMidnight(_today)) {_update = true; continue;}
-
                 _check_state(curt);
-                break;
-            }                
+                if(curt >= _update_time) _calculate(nextMidnight(_today));
+            }
         }
-
-
 
     protected:
-        time_t _rise_time;
-        time_t _set_time;
-        time_t _today;
+        unsigned long ss_last;
         int _state;
-        int _polar;
-        bool _update;
         unsigned char _relayID;
         int _relayMode; // 0 off on  night 1  on on night
+        time_t _rise_time;
+        time_t _set_time;
+        time_t _update_time;
+        time_t _today;
+        int _polar;
 
-        void _calculate_sunrise() { // today is midnight today date with cleared time so no checks and clearing unused elements
+        void _calculate(time_t day)
+        {
+            _today = previousMidnight((day));
             tmElements_t tm;
             breakTime(_today, tm);
-            int min = sun.calc(tm.Year,tm.Month,tm.Day,official,srRISE); // month,date - january=1 ;  t= minutes past midnight of sunrise (6 am would be 360)
-            if(min>=0) _rise_time = _today+min*60;
-            min = sun.calc(tm.Year,tm.Month,tm.Day,official,srSET); // month,date - january=1 ;  t= minutes past midnight of sunrise (6 am would be 360)
-            if(min>=0) _set_time = _today+min*60;
-            _polar = min;
+            int rise_min = sun.calc(tm.Year,tm.Month,tm.Day,official,srRISE); // month,date - january=1 ;  t= minutes past midnight of sunrise (6 am would be 360)
+            int set_min = sun.calc(tm.Year,tm.Month,tm.Day,official,srSET); // month,date - january=1 ;  t= minutes past midnight of sunrise (6 am would be 360)
 
-            DEBUG_MSG(("[SENSOR] Today Time  : %s\n"), (char *) ntpDateTime(_today).c_str());
-            DEBUG_MSG(("[SENSOR] Sunrise Time  : %s\n"), (char *) ntpDateTime(_rise_time).c_str());
-            DEBUG_MSG(("[SENSOR] Sunset Time  : %s\n"), (char *) ntpDateTime(_set_time).c_str());
+            if(rise_min>=0) { _rise_time = _today+rise_min*60;}
+            else { _rise_time = _today; _polar = rise_min; }
+
+            if(set_min>=0) { _update_time = _set_time = _today+set_min*60;}
+            else { _set_time = _today+SECS_PER_DAY; _update_time = _set_time-241*60;}
         }
 
         void _check_state(time_t curt) 

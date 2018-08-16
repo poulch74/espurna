@@ -23,6 +23,7 @@ bool _ntp_configure = false;
 bool _rtc_update = false;
 #endif
 
+extern std::vector<BaseSensor *> _sensors;
 
 // -----------------------------------------------------------------------------
 // NTP
@@ -41,7 +42,11 @@ void _ntpWebSocketOnSend(JsonObject& root) {
     root["ntpOffset"] = getSetting("ntpOffset", NTP_TIME_OFFSET).toInt();
     root["ntpDST"] = getSetting("ntpDST", NTP_DAY_LIGHT).toInt() == 1;
     root["ntpRegion"] = getSetting("ntpRegion", NTP_DST_REGION).toInt();
-    if (ntpSynced()) root["now"] = now();
+
+    root["ntpLatitude"] = getSetting("ntpLatitude", NTP_LATITUDE).toFloat();
+    root["ntpLongitude"] = getSetting("ntpLongitude", NTP_LONGITUDE).toFloat();
+
+    if (ntpSynced()) { root["now"] = now();  }
 }
 
 #endif
@@ -50,7 +55,13 @@ void _ntpStart() {
 
     _ntp_start = 0;
 
-    NTP.begin(getSetting("ntpServer", NTP_SERVER));
+#if RTC_SUPPORT
+    bool cSyncProv = true;
+#else
+    bool cSyncProv = false;
+#endif
+
+    NTP.begin(getSetting("ntpServer", NTP_SERVER),DEFAULT_NTP_TIMEZONE,false,0,NULL,cSyncProv);
 
 #if RTC_SUPPORT
     // set alter sync provider. two attempts for NTP synchro at start occure...
@@ -91,6 +102,21 @@ void _ntpConfigure() {
     uint8_t dst_region = getSetting("ntpRegion", NTP_DST_REGION).toInt();
     NTP.setDSTZone(dst_region);
 
+    // update sunrise provider
+    float lat = getSetting("ntpLatitude", NTP_LATITUDE).toFloat();
+    float lon = getSetting("ntpLongitude", NTP_LONGITUDE).toFloat();
+    DEBUG_MSG_P(PSTR("[NTP] Update Sunrise provider\n[NTP] Time zone : %d\n"), offset);
+    DEBUG_MSG_P(PSTR("[NTP] Latitude provider  : %s\n"), String(lat).c_str());
+    DEBUG_MSG_P(PSTR("[NTP] Longitude provider  : %s\n"), String(lon).c_str());
+
+    sun.begin(lat,lon,(tz_hours+tz_minutes/60.0f));
+
+    if(ntpSynced()) {
+         DEBUG_MSG_P(PSTR("[NTP] Time SYNCED - RESET SENSORS\n"));
+         for (unsigned char i=0; i<_sensors.size(); i++) // and reset sunrise sensors
+            if(_sensors[i]->getID() == SENSOR_SUNRISE_ID) _sensors[i]->begin();
+    }
+
 }
 
 void _ntpUpdate() {
@@ -108,13 +134,6 @@ void _ntpUpdate() {
             if(_rtc_update) setTime_rtc(t);
         #endif
 
-        sun.calc(2018,7,18,official,srRISE); // month,date - january=1 ;  t= minutes past midnight of sunrise (6 am would be 360)
-        tmElements_t tm;
-        breakTime(t, tm);
-        tm.Hour = sun.get_hr();
-        tm.Minute=sun.get_min();
-        time_t st = makeTime(tm); 
-        DEBUG_MSG_P(PSTR("[NTP] Sunrise Time  : %s\n"), (char *) ntpDateTime(st).c_str());
         DEBUG_MSG_P(PSTR("[NTP] UTC Time  : %s\n"), (char *) ntpDateTime(ntpLocal2UTC(t)).c_str());
         DEBUG_MSG_P(PSTR("[NTP] Local Time: %s\n"), (char *) ntpDateTime(t).c_str());
     }
@@ -127,16 +146,15 @@ void _ntpLoop() {
     if (_ntp_configure) _ntpConfigure();
     if (_ntp_update) _ntpUpdate();
 
-    now();
+    time_t t = now();
 
-    #if BROKER_SUPPORT
         static unsigned char last_minute = 60;
         if (ntpSynced() && (minute() != last_minute)) {
             last_minute = minute();
-            brokerPublish(MQTT_TOPIC_DATETIME, ntpDateTime().c_str());
+            #if BROKER_SUPPORT            
+                brokerPublish(MQTT_TOPIC_DATETIME, ntpDateTime(t).c_str());
+            #endif            
         }
-    #endif
-
 }
 
 void _ntpBackwards() {

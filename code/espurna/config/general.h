@@ -1001,6 +1001,15 @@
 #define NTP_DST_REGION              0               // 0 for Europe, 1 for USA (defined in NtpClientLib)
 #endif
 
+#ifndef NTP_LATITUDE
+#define NTP_LATITUDE                0          
+#endif
+
+#ifndef NTP_LONGITUDE
+#define NTP_LONGITUDE               0          
+#endif
+
+
 // -----------------------------------------------------------------------------
 // ALEXA
 // -----------------------------------------------------------------------------

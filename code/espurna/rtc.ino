@@ -22,7 +22,7 @@ static time_t ntp_getTime() {
         tm = getTime_rtc();
         // signal ntp loop to update clock but not rtc...
         _ntp_update = true;
-        #if RTC_SUPPORT && RTC_NTP_SYNC_ENA
+        #if RTC_NTP_SYNC_ENA
         _rtc_update = false;
         #endif
     }

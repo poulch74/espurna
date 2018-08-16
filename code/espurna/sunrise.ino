@@ -1,4 +1,12 @@
-#include "libs/Sunrise.h"
+#include <TimeLib.h>
+#include "libs/sunrise.h"
+#include <vector>
+#include "sensors/BaseSensor.h"
+
+bool ntpSynced();
+String ntpDateTime(time_t t);
+
+
 extern "C" {
     #include "libs/fs_math.h"
 }
@@ -60,22 +68,27 @@ float fs_atan2(float y, float x)
 
 static float zcos[] = {-0.01454,-0.10453,-0.20791,-0.30901};
 
+
 Sunrise::Sunrise(float latitude, float longitude, float timezone)
 {
-   //lat=latitude;
-   sinlat = fs_sin(latitude*_PI180);
-   coslat = fs_cos(latitude*_PI180);
-   lngHour = longitude/15.0f;
-   lngHour24 = lngHour/24.0f;
-   tz=timezone;
+    begin(latitude, longitude, timezone);
+}
 
-   hr=255;
-   min=0;
+void Sunrise::begin(float latitude, float longitude, float timezone)
+{
+    sinlat = fs_sin(latitude*_PI180);
+    coslat = fs_cos(latitude*_PI180);
+    lngHour = longitude/15.0f;
+    lngHour24 = lngHour/24.0f;
+    tz=timezone;
+
+    hr=255;
+    min=0;
 }
 
 int Sunrise::calc(int year, unsigned char  month, unsigned char  day, Zenith zenith, bool rs)
 {
-   int doy;
+    int doy;
    float minutes;
 
    coszenith = zcos[zenith];
@@ -115,6 +128,7 @@ int Sunrise::calc(int year, unsigned char  month, unsigned char  day, Zenith zen
    // we're in the (ant)arctic and there is no rise(or set) today!
    if(cosH>1.0f){ hr=255; return -1; } // polar night
    if(cosH<(-1.0f)){ hr=255; return -2; } // polar day
+   //if(fs_abs(cosH)>1.0f){ hr=255; return -1; } // polar night
     
    float ha=fs_acos(cosH)*_180PI; 
 
@@ -130,11 +144,14 @@ int Sunrise::calc(int year, unsigned char  month, unsigned char  day, Zenith zen
    min=(int)(minutes-hr*60);
 
 // for test
+    static int next = 0;
 
     if(rs) { //rise
-    minutes=(int)(50+19*60);
+    minutes=(int)(10+14*60)+next;
+    next+=10;
     } else { // set
-    minutes=(int)(53+19*60);
+    minutes=(int)(11+14*60)+next;
+    next+=10;
     }
   
    return minutes;
