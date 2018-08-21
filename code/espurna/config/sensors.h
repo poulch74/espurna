@@ -813,7 +813,6 @@
 #endif
 
 #if SUNRISE_SUPPORT
-//    #include <SoftwareSerial.h>
     #include "../sensors/SunriseSensor.h"
 #endif
 

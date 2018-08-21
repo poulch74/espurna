@@ -3,7 +3,7 @@
 // Copyright (C) 2018 by Pavel Chauzov <poulch at mail dot ru>
 // -----------------------------------------------------------------------------
 
-#if SENSOR_SUPPORT && SUNRISE_SUPPORT
+#if SENSOR_SUPPORT && SUNRISE_SUPPORT && NTP_SUPPORT
 
 #pragma once
 
@@ -11,11 +11,10 @@
 #include "Arduino.h"
 #include "BaseSensor.h"
 #include <TimeLib.h>
-#include <NtpClientLib.h>
 #include "../libs/sunrise.h"
 
 // forward decl
-bool ntpSynced();
+time_t ntpSyncedEx();
 String ntpDateTime(time_t t);
 bool relayStatus(unsigned char id, bool status);
 
@@ -43,11 +42,10 @@ class SunriseSensor : public BaseSensor {
         void begin() {
             _ready = true;
             _state = -1;
-            if(ntpSynced()) {
-                time_t curt = now();
+            time_t curt = ntpSyncedEx();
+            if(curt) {
                 _calculate(curt);
                 _check_state(curt);
-
                 DEBUG_MSG(("[SUNRISE] Today Time  : %s\n"), (char *) ntpDateTime(_today).c_str());
                 DEBUG_MSG(("[SUNRISE] Sunrise Time  : %s\n"), (char *) ntpDateTime(_rise_time).c_str());
                 DEBUG_MSG(("[SUNRISE] Sunset Time  : %s\n"), (char *) ntpDateTime(_set_time).c_str());
@@ -65,8 +63,8 @@ class SunriseSensor : public BaseSensor {
             //return String(names[index]);
             
             if (index == 0) return String("Day(1)/Night(0) ");
-            if (index == 1) return String("Sunrise time (BCD) ");
-            if (index == 2) return String("Sunset  time (BCD)" );
+            if (index == 1) return String("ON time (BCD) ");
+            if (index == 2) return String("OFF  time (BCD)" );
             return description();
         };
 
@@ -89,7 +87,7 @@ class SunriseSensor : public BaseSensor {
 
             _error = SENSOR_ERROR_OUT_OF_RANGE;
             time_t tt = _set_time;
-            if (ntpSynced() && (index<3)) {
+            if (ntpSyncedEx() && (index<3)) {
                 _error = SENSOR_ERROR_OK;
                 if(index == 0) return _state;
                 if(index == 1) tt = _rise_time;
@@ -102,9 +100,9 @@ class SunriseSensor : public BaseSensor {
         void tick()
         {
             unsigned long cm = millis();
-            if((cm-ss_last>=10000) && ntpSynced()) {
+            time_t curt = ntpSyncedEx();
+            if(curt && (cm-ss_last>=10000)) {
                 ss_last = cm;
-                time_t curt = now();
                 _check_state(curt);
                 if(curt >= _update_time) _calculate(nextMidnight(_today));
             }

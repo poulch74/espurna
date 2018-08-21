@@ -24,7 +24,8 @@ class Sunrise {
             return v;
         }
 
-        float sinlat,coslat,lngHour,lngHour24, coszenith, tz;
+        float tz;
+        float sinlat,coslat,lngHour,lngHour24, coszenith;
         int  hr,min;
 };
 

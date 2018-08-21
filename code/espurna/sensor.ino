@@ -581,7 +581,7 @@ void _sensorLoad() {
     }
     #endif
 
-    #if SUNRISE_SUPPORT
+    #if SUNRISE_SUPPORT && NTP_SUPPORT
     {
         SunriseSensor * sensor = new SunriseSensor();
         sensor->setRelayBinding(1);

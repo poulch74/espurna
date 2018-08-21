@@ -1,11 +1,6 @@
-#include <TimeLib.h>
+#if SENSOR_SUPPORT && SUNRISE_SUPPORT && NTP_SUPPORT
+
 #include "libs/sunrise.h"
-#include <vector>
-#include "sensors/BaseSensor.h"
-
-bool ntpSynced();
-String ntpDateTime(time_t t);
-
 
 extern "C" {
     #include "libs/fs_math.h"
@@ -21,7 +16,6 @@ extern "C" {
 #define fs_max(a,b) ((a)>(b) ? (a):(b))
 
 #define fs_sin(x) (float(fs_cos(x-_PI2)-fs_cos(x+_PI2))/2.0f)
-
 
 float fs_acos(float x)
 {
@@ -70,7 +64,7 @@ static float zcos[] = {-0.01454,-0.10453,-0.20791,-0.30901};
 
 
 Sunrise::Sunrise(float latitude, float longitude, float timezone)
-{
+{   
     begin(latitude, longitude, timezone);
 }
 
@@ -84,6 +78,7 @@ void Sunrise::begin(float latitude, float longitude, float timezone)
 
     hr=255;
     min=0;
+    
 }
 
 int Sunrise::calc(int year, unsigned char  month, unsigned char  day, Zenith zenith, bool rs)
@@ -157,4 +152,23 @@ int Sunrise::calc(int year, unsigned char  month, unsigned char  day, Zenith zen
    return minutes;
 }
 
-Sunrise sun(55.7,37.6,3);
+Sunrise sun(55.7,37.6,3); // Moscow default
+
+extern std::vector<BaseSensor *> _sensors;
+
+void SunProviderInit()
+{
+    int offset = getSetting("ntpOffset", NTP_TIME_OFFSET).toInt();
+    float lat = getSetting("ntpLatitude", NTP_LATITUDE).toFloat();
+    float lon = getSetting("ntpLongitude", NTP_LONGITUDE).toFloat();
+    DEBUG_MSG_P(PSTR("[NTP] Time zone : %d\n"), offset);
+    DEBUG_MSG_P(PSTR("[NTP] Latitude : %s\n"), String(lat).c_str());
+    DEBUG_MSG_P(PSTR("[NTP] Longitude : %s\n"), String(lon).c_str());
+
+    sun.begin(lat,lon,offset/60.0);
+     
+    for (unsigned char i=0; i<_sensors.size(); i++) // and reset sunrise sensors
+        if(_sensors[i]->getID() == SENSOR_SUNRISE_ID) _sensors[i]->begin();
+}
+
+#endif

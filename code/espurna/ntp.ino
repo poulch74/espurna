@@ -13,8 +13,6 @@ Copyright (C) 2016-2018 by Xose Pérez <xose dot perez at gmail dot com>
 #include <WiFiClient.h>
 #include <Ticker.h>
 
-#include "libs/sunrise.h"
-
 unsigned long _ntp_start = 0;
 bool _ntp_update = false;
 bool _ntp_configure = false;
@@ -23,7 +21,6 @@ bool _ntp_configure = false;
 bool _rtc_update = false;
 #endif
 
-extern std::vector<BaseSensor *> _sensors;
 
 // -----------------------------------------------------------------------------
 // NTP
@@ -46,7 +43,8 @@ void _ntpWebSocketOnSend(JsonObject& root) {
     root["ntpLatitude"] = getSetting("ntpLatitude", NTP_LATITUDE).toFloat();
     root["ntpLongitude"] = getSetting("ntpLongitude", NTP_LONGITUDE).toFloat();
 
-    if (ntpSynced()) { root["now"] = now();  }
+    time_t t = ntpSyncedEx();
+    if (t) { root["now"] = t;  }
 }
 
 #endif
@@ -55,23 +53,18 @@ void _ntpStart() {
 
     _ntp_start = 0;
 
-#if RTC_SUPPORT
-    bool cSyncProv = true;
-#else
-    bool cSyncProv = false;
-#endif
-
-    NTP.begin(getSetting("ntpServer", NTP_SERVER),DEFAULT_NTP_TIMEZONE,false,0,NULL,cSyncProv);
-
-#if RTC_SUPPORT
-    // set alter sync provider. two attempts for NTP synchro at start occure...
-    setSyncProvider(ntp_getTime);
-#endif    
+    #if RTC_SUPPORT
+        NTP.begin(getSetting("ntpServer", NTP_SERVER),DEFAULT_NTP_TIMEZONE,false,0,NULL,true);
+        // set alter sync provider. two attempts for NTP synchro at start occure...
+        setSyncProvider(ntp_getTime);
+    #else
+        NTP.begin(getSetting("ntpServer", NTP_SERVER));
+    #endif
 
     NTP.setInterval(NTP_SYNC_INTERVAL, NTP_UPDATE_INTERVAL);
     NTP.setNTPTimeout(NTP_TIMEOUT);
-    _ntpConfigure();
-
+    //_ntpConfigure();
+    _ntp_configure = true;
 }
 
 void _ntpConfigure() {
@@ -103,23 +96,14 @@ void _ntpConfigure() {
     NTP.setDSTZone(dst_region);
 
     // update sunrise provider
-    float lat = getSetting("ntpLatitude", NTP_LATITUDE).toFloat();
-    float lon = getSetting("ntpLongitude", NTP_LONGITUDE).toFloat();
-    DEBUG_MSG_P(PSTR("[NTP] Update Sunrise provider\n[NTP] Time zone : %d\n"), offset);
-    DEBUG_MSG_P(PSTR("[NTP] Latitude provider  : %s\n"), String(lat).c_str());
-    DEBUG_MSG_P(PSTR("[NTP] Longitude provider  : %s\n"), String(lon).c_str());
-
-    sun.begin(lat,lon,(tz_hours+tz_minutes/60.0f));
-
-    if(ntpSynced()) {
-         DEBUG_MSG_P(PSTR("[NTP] Time SYNCED - RESET SENSORS\n"));
-         for (unsigned char i=0; i<_sensors.size(); i++) // and reset sunrise sensors
-            if(_sensors[i]->getID() == SENSOR_SUNRISE_ID) _sensors[i]->begin();
-    }
-
+    #if SENSOR_SUPPORT && SUNRISE_SUPPORT
+        if(ntpSyncedEx()) {
+             SunProviderInit();
+        }
+    #endif        
 }
 
-void _ntpUpdate() {
+void _ntpUpdate(time_t t) {
 
     _ntp_update = false;
 
@@ -127,8 +111,7 @@ void _ntpUpdate() {
         wsSend(_ntpWebSocketOnSend);
     #endif
 
-    if (ntpSynced()) {
-        time_t t = now();
+    if (t) {
         #if RTC_SUPPORT && RTC_NTP_SYNC_ENA
             // sync/update rtc here!!!!!!!!!!!!
             if(_rtc_update) setTime_rtc(t);
@@ -144,17 +127,22 @@ void _ntpLoop() {
 
     if (0 < _ntp_start && _ntp_start < millis()) _ntpStart();
     if (_ntp_configure) _ntpConfigure();
-    if (_ntp_update) _ntpUpdate();
 
-    time_t t = now();
+    time_t t = ntpSyncedEx();
+    if (_ntp_update) _ntpUpdate(t);
 
+    #if BROKER_SUPPORT            
         static unsigned char last_minute = 60;
-        if (ntpSynced() && (minute() != last_minute)) {
-            last_minute = minute();
-            #if BROKER_SUPPORT            
+        if(t)
+        {
+            tmElements_t tm;
+            breakTime(t,tm);
+            if (tm.Minute != last_minute) {
+                last_minute = tm.Minute;
                 brokerPublish(MQTT_TOPIC_DATETIME, ntpDateTime(t).c_str());
-            #endif            
+            }
         }
+    #endif                    
 }
 
 void _ntpBackwards() {
@@ -170,21 +158,29 @@ void _ntpBackwards() {
 
 // -----------------------------------------------------------------------------
 
+time_t ntpSyncedEx() {
+    time_t t = now();
+    return (t>1483228800) ? t : 0; // 01.01.2017
+}
+
 bool ntpSynced() {
     return (year() > 2017);
 }
 
 String ntpDateTime(time_t t) {
     char buffer[20];
+    tmElements_t tm;
+    breakTime(t,tm);
     snprintf_P(buffer, sizeof(buffer),
         PSTR("%04d-%02d-%02d %02d:%02d:%02d"),
-        year(t), month(t), day(t), hour(t), minute(t), second(t)
+        tmYearToCalendar(tm.Year),tm.Month,tm.Day,tm.Hour,tm.Minute,tm.Second
     );
     return String(buffer);
 }
 
 String ntpDateTime() {
-    if (ntpSynced()) return ntpDateTime(now());
+    time_t t = ntpSyncedEx();
+    if (t) return ntpDateTime(t);
     return String();
 }
 
@@ -239,10 +235,8 @@ void ntpSetup() {
     // Register loop
     espurnaRegisterLoop(_ntpLoop);
     
-    #if RTC_SUPPORT
-        #if TERMINAL_SUPPORT
-            _rtcInitCommands();
-        #endif
+    #if RTC_SUPPORT && TERMINAL_SUPPORT
+        _rtcInitCommands();
     #endif        
 
 }

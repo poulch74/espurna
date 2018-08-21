@@ -179,13 +179,15 @@ void setup() {
     migrate();
 
     saveSettings();
-
 }
 
 void loop() {
 
     // Call registered loop callbacks
-    for (unsigned char i = 0; i < _loop_callbacks.size(); i++) {
-        (_loop_callbacks[i])();
-    }
+    //for (unsigned char i = 0; i < _loop_callbacks.size(); i++) {
+    //    (_loop_callbacks[i])();
+    //}
+    
+    static int ccount = 0;
+    (_loop_callbacks[(ccount = (ccount == _loop_callbacks.size() ? 0: ccount))++])();
 }
