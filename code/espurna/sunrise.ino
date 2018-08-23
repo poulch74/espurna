@@ -35,29 +35,29 @@ float fs_acos(float x)
 
 float fs_atan2(float y, float x)
 {
-  float t0, t1, t2, t3, t4;
+    float t0, t1, t2, t3, t4;
 
-  t3 = fs_abs(x);
-  t1 = fs_abs(y);
-  t2 = (t1>t3);
-  t0 = fs_max(t3, t1);
-  t1 = fs_min(t3, t1);
-  t3= t1/t0;
+    t3 = fs_abs(x);
+    t1 = fs_abs(y);
+    t2 = (t1>t3);
+    t0 = fs_max(t3, t1);
+    t1 = fs_min(t3, t1);
+    t3= t1/t0;
 
-  t4 = t3 * t3;
-  t0 =         - 0.013480470f;
-  t0 = t0 * t4 + 0.057477314f;
-  t0 = t0 * t4 - 0.121239071f;
-  t0 = t0 * t4 + 0.195635925f;
-  t0 = t0 * t4 - 0.332994597f;
-  t0 = t0 * t4 + 0.999995630f;
-  t3 = t0 * t3;
+    t4 = t3 * t3;
+    t0 =         - 0.013480470f;
+    t0 = t0 * t4 + 0.057477314f;
+    t0 = t0 * t4 - 0.121239071f;
+    t0 = t0 * t4 + 0.195635925f;
+    t0 = t0 * t4 - 0.332994597f;
+    t0 = t0 * t4 + 0.999995630f;
+    t3 = t0 * t3;
 
-  t3 = t2 ? 1.570796327f - t3 : t3;
-  t3 = (x < 0) ?  3.141592654f - t3 : t3;
-  t3 = (y < 0) ? -t3 : t3;
+    t3 = t2 ? 1.570796327f - t3 : t3;
+    t3 = (x < 0) ?  3.141592654f - t3 : t3;
+    t3 = (y < 0) ? -t3 : t3;
 
-  return t3;
+    return t3;
 }
 
 static float zcos[] = {-0.01454,-0.10453,-0.20791,-0.30901};
@@ -76,67 +76,66 @@ void Sunrise::begin(float latitude, float longitude, float timezone)
     lngHour24 = lngHour/24.0f;
     tz=timezone;
 
-    hr=255;
-    min=0;
-    
+    //hr=255;
+    //min=0;
 }
 
-int Sunrise::calc(int year, unsigned char  month, unsigned char  day, Zenith zenith, bool rs)
+int Sunrise::calc(int year, unsigned char  month, unsigned char  day, Zenith zenith, unsigned char rs)
 {
     int doy;
-   float minutes;
+    float minutes;
 
-   coszenith = zcos[zenith];
+    coszenith = zcos[zenith];
 
-   // approximate day of year
-   int N1,N2,N3;
-   N1 = 275*month/9;
-   N2 = (month+9)/12;
-   N3 = 1+((year-4*(year/4)+2)/3);
-   doy = N1-(N2*N3)+day-30;
-   
-   float t = doy-lngHour24;
-   if(rs) t+=0.25f;
-   else t+=0.75f;
-
-   //calculate the Sun's mean anomaly
-   float M = (t * 0.9856f) - 3.289f;
-   float Mr = M*_PI180;
-
-   float L = M + (1.916f * fs_sin(Mr)) + (0.020f * fs_sin(2.0f * Mr)) + 282.634f;
-   L = adjust(L,360);
-   
-   float RA = fs_atan2(0.91764f * fs_sin(L*_PI180),fs_cos(L*_PI180))*_180PI;
-   RA = adjust(RA,360);
-
-   int Lquadrant  = L/90;
-   int RAquadrant = RA/90;
-
-   RA = (RA + 90.0f*(Lquadrant - RAquadrant))/15.0f;
-
-   float sinDec = (0.39782f) * fs_sin(L*_PI180);
-   float cosDec = fs_sqrt(float(1.0-sinDec*sinDec));
-
-   // calculate the Sun's local hour angle
-   float cosH = (coszenith - (sinDec * sinlat)) / (cosDec * coslat);
-
-   // we're in the (ant)arctic and there is no rise(or set) today!
-   if(cosH>1.0f){ hr=255; return -1; } // polar night
-   if(cosH<(-1.0f)){ hr=255; return -2; } // polar day
-   //if(fs_abs(cosH)>1.0f){ hr=255; return -1; } // polar night
+    // approximate day of year
+    int N1,N2,N3;
+    N1 = 275*month/9;
+    N2 = (month+9)/12;
+    N3 = 1+((year-4*(year/4)+2)/3);
+    doy = N1-(N2*N3)+day-30;
     
-   float ha=fs_acos(cosH)*_180PI; 
+    float t = doy - lngHour24;
+    if(rs) t+=0.25f;
+    else t+=0.75f;
 
-   if(rs==1) ha=360-ha;
+    //calculate the Sun's mean anomaly
+    float M = (t * 0.9856f) - 3.289f;
+    float Mr = M*_PI180;
 
-   float UT = ha/15.0f + RA - (0.06571f * t) - 6.622f - lngHour;
-   UT+=tz;
-   UT = adjust(UT,24);
-
-   minutes = UT*(60.0f);
+    float L = M + (1.916f * fs_sin(Mr)) + (0.020f * fs_sin(2.0f * Mr)) + 282.634f;
+    L = adjust(L,360);
    
-   hr=minutes/60;
-   min=(int)(minutes-hr*60);
+    float RA = fs_atan2(0.91764f * fs_sin(L*_PI180),fs_cos(L*_PI180))*_180PI;
+    RA = adjust(RA,360);
+
+    int Lquadrant  = L/90;
+    int RAquadrant = RA/90;
+
+    RA = (RA + 90.0f*(Lquadrant - RAquadrant))/15.0f;
+
+    float sinDec = (0.39782f) * fs_sin(L*_PI180);
+    float cosDec = fs_sqrt(float(1.0-sinDec*sinDec));
+
+    // calculate the Sun's local hour angle
+    float cosH = (coszenith - (sinDec * sinlat)) / (cosDec * coslat);
+
+    // we're in the (ant)arctic and there is no rise(or set) today!
+    if(cosH>1.0f){ /*hr=255;*/ return -1; } // polar night
+    if(cosH<(-1.0f)){ /*hr=255;*/ return -2; } // polar day
+    //if(fs_abs(cosH)>1.0f){ hr=255; return -1; } // polar night
+    
+    float ha=fs_acos(cosH)*_180PI; 
+
+    if(rs==1) ha=360-ha;
+
+    float UT = ha/15.0f + RA - (0.06571f * t) - 6.622f - lngHour;
+    UT+=tz;
+    UT = adjust(UT,24);
+
+    minutes = UT*(60.0f);
+   
+    //hr=minutes/60;
+    //min=(int)(minutes-hr*60);
 
 // for test
     static int next = 0;
@@ -149,7 +148,7 @@ int Sunrise::calc(int year, unsigned char  month, unsigned char  day, Zenith zen
     next+=10;
     }
   
-   return minutes;
+    return minutes;
 }
 
 Sunrise sun(55.7,37.6,3); // Moscow default

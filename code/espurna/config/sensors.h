@@ -603,8 +603,25 @@
 #define V9261F_RPOWER_FACTOR            V9261F_CURRENT_FACTOR
 
 
+//-------------------------------------------------------------
+// sunrise sensor support
+// for second add sensor init in sensor.ino
+// and SUNRISE2_ macros below
+//-------------------------------------------------------------
 #ifndef SUNRISE_SUPPORT
-#define SUNRISE_SUPPORT               0
+#define SUNRISE_SUPPORT                0
+#endif
+
+#ifndef SUNRISE1_RELAY
+#define SUNRISE1_RELAY                 1
+#endif
+// signed char in minutes
+#ifndef SUNRISE1_RISE_OFS
+#define SUNRISE1_RISE_OFS              (5)
+#endif
+// signed char in minutes
+#ifndef SUNRISE1_SET_OFS
+#define SUNRISE1_SET_OFS               (-5)
 #endif
 
 

@@ -31,6 +31,7 @@ class SunriseSensor : public BaseSensor {
             _count = 3;
             _sensor_id = SENSOR_SUNRISE_ID;
             _relayID = 0;
+            _num = 1;
         }
 
 
@@ -55,16 +56,18 @@ class SunriseSensor : public BaseSensor {
 
         // Descriptive name of the sensor
         String description() {
-            return String("SUNRISE @ DEV");
+            char buffer[20];
+            snprintf(buffer, sizeof(buffer), "SUNRISE%d @ MCU", _num);
+            return String(buffer);
         }
 
         // Descriptive name of the slot # index
         String slot(unsigned char index) {
             //return String(names[index]);
             
-            if (index == 0) return String("Day(1)/Night(0) ");
-            if (index == 1) return String("ON time (BCD) ");
-            if (index == 2) return String("OFF  time (BCD)" );
+            if (index == 0) return String("Day(1)/Night(0) ")  + description();
+            if (index == 1) return String("ON time (BCD) ")    + description();
+            if (index == 2) return String("OFF  time (BCD) " ) + description();
             return description();
         };
 
@@ -78,8 +81,20 @@ class SunriseSensor : public BaseSensor {
             return MAGNITUDE_ANALOG;
         }
 
+        void setIndex(unsigned char id) {
+            _num = id;
+        }
+
         void setRelayBinding(unsigned char id) {
             _relayID = id;
+        }
+
+        void setRiseOffset(signed char minutes) {
+            _rise_off = minutes*60;
+        }
+        
+        void setSetOffset(signed char minutes) {
+            _set_off = minutes*60;
         }
 
         // Current value for slot # index
@@ -111,7 +126,10 @@ class SunriseSensor : public BaseSensor {
     protected:
         unsigned long ss_last;
         int _state;
+        unsigned char _num;
         unsigned char _relayID;
+        int _rise_off;
+        int _set_off;
         int _relayMode; // 0 off on  night 1  on on night
         time_t _rise_time;
         time_t _set_time;
@@ -124,14 +142,17 @@ class SunriseSensor : public BaseSensor {
             _today = previousMidnight((day));
             tmElements_t tm;
             breakTime(_today, tm);
-            int rise_min = sun.calc(tm.Year,tm.Month,tm.Day,official,srRISE); // month,date - january=1 ;  t= minutes past midnight of sunrise (6 am would be 360)
-            int set_min = sun.calc(tm.Year,tm.Month,tm.Day,official,srSET); // month,date - january=1 ;  t= minutes past midnight of sunrise (6 am would be 360)
+            int rise_min = sun.calc(tm.Year,tm.Month,tm.Day,official,sRISE); // month,date - january=1 ;  t= minutes past midnight of sunrise (6 am would be 360)
+            int set_min = sun.calc(tm.Year,tm.Month,tm.Day,official,sSET); // month,date - january=1 ;  t= minutes past midnight of sunrise (6 am would be 360)
 
             if(rise_min>=0) { _rise_time = _today+rise_min*60;}
             else { _rise_time = _today; _polar = rise_min; }
 
             if(set_min>=0) { _update_time = _set_time = _today+set_min*60;}
-            else { _set_time = _today+SECS_PER_DAY; _update_time = _set_time-241*60;}
+            else { _set_time = _today+SECS_PER_DAY; _update_time = _set_time-128*60;}
+
+            _rise_time+=_rise_off;
+            _set_time+=_set_off;
         }
 
         void _check_state(time_t curt) 

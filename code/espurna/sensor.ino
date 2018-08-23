@@ -584,7 +584,10 @@ void _sensorLoad() {
     #if SUNRISE_SUPPORT && NTP_SUPPORT
     {
         SunriseSensor * sensor = new SunriseSensor();
-        sensor->setRelayBinding(1);
+        sensor->setIndex(1);
+        sensor->setRelayBinding(SUNRISE1_RELAY);
+        sensor->setRiseOffset(SUNRISE1_RISE_OFS);
+        sensor->setSetOffset(SUNRISE1_SET_OFS);
         _sensors.push_back(sensor);
     }
     #endif
