@@ -95,12 +95,6 @@ void _ntpConfigure() {
     uint8_t dst_region = getSetting("ntpRegion", NTP_DST_REGION).toInt();
     NTP.setDSTZone(dst_region);
 
-    // update sunrise provider
-    #if SENSOR_SUPPORT && SUNRISE_SUPPORT
-        if(ntpSyncedEx()) {
-             SunProviderInit();
-        }
-    #endif        
 }
 
 void _ntpUpdate(time_t t) {

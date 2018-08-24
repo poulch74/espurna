@@ -155,19 +155,57 @@ Sunrise sun(55.7,37.6,3); // Moscow default
 
 extern std::vector<BaseSensor *> _sensors;
 
-void SunProviderInit()
+bool _sunrise_update = false;
+bool _sunrise_configure = false;
+
+void _sunriseConfigure()
 {
+    _sunrise_configure = false;
     int offset = getSetting("ntpOffset", NTP_TIME_OFFSET).toInt();
     float lat = getSetting("ntpLatitude", NTP_LATITUDE).toFloat();
     float lon = getSetting("ntpLongitude", NTP_LONGITUDE).toFloat();
-    DEBUG_MSG_P(PSTR("[NTP] Time zone : %d\n"), offset);
-    DEBUG_MSG_P(PSTR("[NTP] Latitude : %s\n"), String(lat).c_str());
-    DEBUG_MSG_P(PSTR("[NTP] Longitude : %s\n"), String(lon).c_str());
 
-    sun.begin(lat,lon,offset/60.0);
-     
-    for (unsigned char i=0; i<_sensors.size(); i++) // and reset sunrise sensors
-        if(_sensors[i]->getID() == SENSOR_SUNRISE_ID) _sensors[i]->begin();
+    DEBUG_MSG_P(PSTR("[SUNRISE] Time zone : %d\n"), offset);
+    DEBUG_MSG_P(PSTR("[SUNRISE] Latitude : %s\n"), String(lat).c_str());
+    DEBUG_MSG_P(PSTR("[SUNRISE] Longitude : %s\n"), String(lon).c_str());
+
+    sun.begin(lat,lon,offset/60.0);    
+
+    _sunrise_update = true;
+}
+
+void _sunriseUpdate()
+{
+    if(ntpSyncedEx())
+    {
+        _sunrise_update = false;
+
+        for (unsigned char i=0; i<_sensors.size(); i++) // and reset sunrise sensors
+            if(_sensors[i]->getID() == SENSOR_SUNRISE_ID) _sensors[i]->begin();
+    }            
+}
+
+void _sunriseLoop() {
+
+    if(_sunrise_configure) _sunriseConfigure();
+    if(_sunrise_update) _sunriseUpdate();
+
+    // тут проверять смену суток и форсировать update
+
+}
+
+void sunriseSetup() {
+
+    _sunrise_configure = true;
+
+    #if WEB_SUPPORT
+        //wsOnSendRegister(_ntpWebSocketOnSend);
+        //wsOnReceiveRegister(_ntpWebSocketOnReceive);
+        wsOnAfterParseRegister([]() { _sunrise_configure = true; });
+    #endif
+
+    // Register loop
+    espurnaRegisterLoop(_sunriseLoop);
 }
 
 #endif

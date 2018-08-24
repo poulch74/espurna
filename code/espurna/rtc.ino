@@ -11,7 +11,6 @@ in debug terminal   - RTC return current rtc time
 */
 
 #if RTC_SUPPORT
-
 static int _rtc_recovery = 0;
 
 static time_t ntp_getTime() {
@@ -80,6 +79,10 @@ void _rtcInitCommands() {
             t = makeTime(tm);
             setTime_rtc(t);
             setTime(t);
+            #if SUNRISE_SUPPORT
+                _sunrise_update = true;
+            #endif                
+
 
             DEBUG_MSG_P(PSTR("[NTP] SET RTC Local Time: %s\n"), (char *) ntpDateTime(t).c_str());
         }

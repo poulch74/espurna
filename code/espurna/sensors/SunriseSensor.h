@@ -47,9 +47,9 @@ class SunriseSensor : public BaseSensor {
             if(curt) {
                 _calculate(curt);
                 _check_state(curt);
-                DEBUG_MSG(("[SUNRISE] Today Time  : %s\n"), (char *) ntpDateTime(_today).c_str());
-                DEBUG_MSG(("[SUNRISE] Sunrise Time  : %s\n"), (char *) ntpDateTime(_rise_time).c_str());
-                DEBUG_MSG(("[SUNRISE] Sunset Time  : %s\n"), (char *) ntpDateTime(_set_time).c_str());
+                DEBUG_MSG(("[SUNSENSOR] Today Time  : %s\n"), (char *) ntpDateTime(_today).c_str());
+                DEBUG_MSG(("[SUNSENSOR] Sunrise Time  : %s\n"), (char *) ntpDateTime(_rise_time).c_str());
+                DEBUG_MSG(("[SUNSENSOR] Sunset Time  : %s\n"), (char *) ntpDateTime(_set_time).c_str());
             }
             ss_last = 0;
         }
@@ -171,7 +171,7 @@ class SunriseSensor : public BaseSensor {
                 _state = curstate;
                 if(_relayID > 0) {
                     int status = _relayMode ? (!_state):_state;
-                    DEBUG_MSG(("[SENSOR] Switch relay  : %d\n"), status);
+                    DEBUG_MSG(("[SUNSENSOR] Switch relay  : %d\n"), status);
                     relayStatus(_relayID - 1, status);
                 }
             }

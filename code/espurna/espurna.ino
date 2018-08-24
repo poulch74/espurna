@@ -126,6 +126,9 @@ void setup() {
     #if NTP_SUPPORT
         ntpSetup();
     #endif
+    #if SUNRISE_SUPPORT    
+        sunriseSetup();
+    #endif
     #if I2C_SUPPORT
         i2cSetup();
     #endif
