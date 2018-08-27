@@ -11,6 +11,9 @@ in debug terminal   - RTC return current rtc time
 */
 
 #if RTC_SUPPORT
+
+extern bool _sunrise_configure;
+
 static int _rtc_recovery = 0;
 
 static time_t ntp_getTime() {
@@ -51,6 +54,7 @@ String _rtc_getValue(String data, char sep, int idx) {
     return found>idx ? data.substring(si[0], si[1]) : "0";
 }
 
+
 void _rtcInitCommands() {
 
     settingsRegisterCommand(F("RTC"), [](Embedis* e) {
@@ -80,9 +84,8 @@ void _rtcInitCommands() {
             setTime_rtc(t);
             setTime(t);
             #if SUNRISE_SUPPORT
-                _sunrise_update = true;
+                _sunrise_configure = true;
             #endif                
-
 
             DEBUG_MSG_P(PSTR("[NTP] SET RTC Local Time: %s\n"), (char *) ntpDateTime(t).c_str());
         }
