@@ -142,8 +142,8 @@ class SunriseSensor : public BaseSensor {
             _today = previousMidnight((day));
             tmElements_t tm;
             breakTime(_today, tm);
-            int rise_min = sun.calc(tm.Year,tm.Month,tm.Day,official,sRISE); // month,date - january=1 ;  t= minutes past midnight of sunrise (6 am would be 360)
-            int set_min = sun.calc(tm.Year,tm.Month,tm.Day,official,sSET); // month,date - january=1 ;  t= minutes past midnight of sunrise (6 am would be 360)
+            int rise_min = sun.calc(tmYearToCalendar(tm.Year),tm.Month,tm.Day,official,sRISE); // month,date - january=1 ;  t= minutes past midnight of sunrise (6 am would be 360)
+            int set_min = sun.calc(tmYearToCalendar(tm.Year),tm.Month,tm.Day,official,sSET); // month,date - january=1 ;  t= minutes past midnight of sunrise (6 am would be 360)
 
             if(rise_min>=0) { _rise_time = _today+rise_min*60;}
             else { _rise_time = _today; _polar = rise_min; }

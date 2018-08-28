@@ -12,15 +12,27 @@ Copyright (C) 2016-2018 by Xose Pérez <xose dot perez at gmail dot com>
 #include <vector>
 #include <functional>
 
+
+typedef std::function<void(unsigned char id, bool status)> TRelayProviderStatusCb;
+
 typedef struct {
+
+    TRelayProviderStatusCb _statusProvider;
 
     // Configuration variables
 
     unsigned char pin;          // GPIO pin for the relay
+    unsigned char pin2;         // GPIO pin2 for the valve if hbridge
+    unsigned char pinP;         // GPIO pinP pulse to start/autostop for the valve if hbridge
+    unsigned char btnID;        // btnID  for once pressed button to reset
+
     unsigned char type;         // RELAY_TYPE_NORMAL, RELAY_TYPE_INVERSE, RELAY_TYPE_LATCHED or RELAY_TYPE_LATCHED_INVERSE
     unsigned char reset_pin;    // GPIO to reset the relay if RELAY_TYPE_LATCHED
     unsigned long delay_on;     // Delay to turn relay ON
     unsigned long delay_off;    // Delay to turn relay OFF
+
+    unsigned long pulse_hb;    
+
     unsigned char pulse;        // RELAY_PULSE_NONE, RELAY_PULSE_OFF or RELAY_PULSE_ON
     unsigned long pulse_ms;     // Pulse length in millis
 
@@ -37,6 +49,7 @@ typedef struct {
     // Helping objects
 
     Ticker pulseTicker;         // Holds the pulse back timer
+    Ticker postTicker;          // for valve stop timeout  see /relays/hbridge.h
 
 } relay_t;
 std::vector<relay_t> _relays;
@@ -46,94 +59,7 @@ Ticker _relaySaveTicker;
 // -----------------------------------------------------------------------------
 // RELAY PROVIDERS
 // -----------------------------------------------------------------------------
-
-void _relayProviderStatus(unsigned char id, bool status) {
-
-    // Check relay ID
-    if (id >= _relays.size()) return;
-
-    // Store new current status
-    _relays[id].current_status = status;
-
-    #if RELAY_PROVIDER == RELAY_PROVIDER_RFBRIDGE
-        rfbStatus(id, status);
-    #endif
-
-    #if RELAY_PROVIDER == RELAY_PROVIDER_DUAL
-
-        // Calculate mask
-        unsigned char mask=0;
-        for (unsigned char i=0; i<_relays.size(); i++) {
-            if (_relays[i].current_status) mask = mask + (1 << i);
-        }
-
-        // Send it to F330
-        Serial.flush();
-        Serial.write(0xA0);
-        Serial.write(0x04);
-        Serial.write(mask);
-        Serial.write(0xA1);
-        Serial.flush();
-
-    #endif
-
-    #if RELAY_PROVIDER == RELAY_PROVIDER_STM
-        Serial.flush();
-        Serial.write(0xA0);
-        Serial.write(id + 1);
-        Serial.write(status);
-        Serial.write(0xA1 + status + id);
-        Serial.flush();
-    #endif
-
-    #if RELAY_PROVIDER == RELAY_PROVIDER_LIGHT
-
-        // If the number of relays matches the number of light channels
-        // assume each relay controls one channel.
-        // If the number of relays is the number of channels plus 1
-        // assume the first one controls all the channels and
-        // the rest one channel each.
-        // Otherwise every relay controls all channels.
-        // TODO: this won't work with a mixed of dummy and real relays
-        // but this option is not allowed atm (YANGNI)
-        if (_relays.size() == lightChannels()) {
-            lightState(id, status);
-            lightState(true);
-        } else if (_relays.size() == lightChannels() + 1) {
-            if (id == 0) {
-                lightState(status);
-            } else {
-                lightState(id-1, status);
-            }
-        } else {
-            lightState(status);
-        }
-
-        lightUpdate(true, true);
-
-    #endif
-
-    #if RELAY_PROVIDER == RELAY_PROVIDER_RELAY
-        if (_relays[id].type == RELAY_TYPE_NORMAL) {
-            digitalWrite(_relays[id].pin, status);
-        } else if (_relays[id].type == RELAY_TYPE_INVERSE) {
-            digitalWrite(_relays[id].pin, !status);
-        } else if (_relays[id].type == RELAY_TYPE_LATCHED || _relays[id].type == RELAY_TYPE_LATCHED_INVERSE) {
-            bool pulse = RELAY_TYPE_LATCHED ? HIGH : LOW;
-            digitalWrite(_relays[id].pin, !pulse);
-            if (GPIO_NONE != _relays[id].reset_pin) digitalWrite(_relays[id].reset_pin, !pulse);
-            if (status || (GPIO_NONE == _relays[id].reset_pin)) {
-                digitalWrite(_relays[id].pin, pulse);
-            } else {
-                digitalWrite(_relays[id].reset_pin, pulse);
-            }
-            nice_delay(RELAY_LATCHING_PULSE);
-            digitalWrite(_relays[id].pin, !pulse);
-            if (GPIO_NONE != _relays[id].reset_pin) digitalWrite(_relays[id].reset_pin, !pulse);
-        }
-    #endif
-
-}
+#include "relays/_relays.h"
 
 /**
  * Walks the relay vector processing only those relays
@@ -157,10 +83,10 @@ void _relayProcess(bool mode) {
         // Only process if the change_time has arrived
         if (current_time < _relays[id].change_time) continue;
 
-        DEBUG_MSG_P(PSTR("[RELAY] #%d set to %s\n"), id, target ? "ON" : "OFF");
-
         // Call the provider to perform the action
-        _relayProviderStatus(id, target);
+        //_relayProviderStatus(id, target);
+        _relays[id]._statusProvider(id,target);
+        DEBUG_MSG_P(PSTR("[RELAY] #%d set to %s\n"), id, target ? "ON" : "OFF");
 
         // Send to Broker
         #if BROKER_SUPPORT
@@ -517,9 +443,29 @@ void _relayBoot() {
 
 void _relayConfigure() {
     for (unsigned int i=0; i<_relays.size(); i++) {
-        pinMode(_relays[i].pin, OUTPUT);
-        if (GPIO_NONE != _relays[i].reset_pin) {
-            pinMode(_relays[i].reset_pin, OUTPUT);
+
+        if (_relays[i].type == RELAY_TYPE_HBRIDGE) {
+            if(_relays[i].pinP != GPIO_NONE) {
+                pinMode(_relays[i].pinP, OUTPUT);
+                digitalWrite(_relays[i].pinP, LOW);
+            }
+            if(_relays[i].pin2 != GPIO_NONE) {
+                pinMode(_relays[i].pin2, OUTPUT);
+                digitalWrite(_relays[i].pin2, LOW);
+            }
+            if(_relays[i].pin != GPIO_NONE) {
+                pinMode(_relays[i].pin, OUTPUT);
+                digitalWrite(_relays[i].pin, LOW);
+            }
+        } else {
+            if(_relays[i].pin != GPIO_NONE) {    
+                pinMode(_relays[i].pin, OUTPUT);
+            }
+            if (_relays[i].type == RELAY_TYPE_LATCHED || _relays[i].type == RELAY_TYPE_LATCHED_INVERSE) {
+                if(_relays[i].reset_pin != GPIO_NONE) {
+                    pinMode(_relays[i].reset_pin, OUTPUT);
+                }
+            }
         }
         _relays[i].pulse = getSetting("relayPulse", i, RELAY_PULSE_MODE).toInt();
         _relays[i].pulse_ms = 1000 * getSetting("relayTime", i, RELAY_PULSE_MODE).toFloat();
@@ -555,6 +501,8 @@ void _relayWebSocketOnStart(JsonObject& root) {
     for (unsigned char i=0; i<relayCount(); i++) {
         JsonObject& line = config.createNestedObject();
         line["gpio"] = _relays[i].pin;
+        line["gpio2"] = _relays[i].pin2;
+        line["gpioP"] = _relays[i].pinP;
         line["type"] = _relays[i].type;
         line["reset"] = _relays[i].reset_pin;
         line["boot"] = getSetting("relayBoot", i, RELAY_BOOT_MODE).toInt();
@@ -958,41 +906,56 @@ void _relayLoop() {
 }
 
 void relaySetup() {
-
     // Dummy relays for AI Light, Magic Home LED Controller, H801,
     // Sonoff Dual and Sonoff RF Bridge
+
+    TRelayProviderStatusCb _relaycb = _relayDummyCb;
+
     #if DUMMY_RELAY_COUNT > 0
-        unsigned int _delay_on[8] = {RELAY1_DELAY_ON, RELAY2_DELAY_ON, RELAY3_DELAY_ON, RELAY4_DELAY_ON, RELAY5_DELAY_ON, RELAY6_DELAY_ON, RELAY7_DELAY_ON, RELAY8_DELAY_ON};
-        unsigned int _delay_off[8] = {RELAY1_DELAY_OFF, RELAY2_DELAY_OFF, RELAY3_DELAY_OFF, RELAY4_DELAY_OFF, RELAY5_DELAY_OFF, RELAY6_DELAY_OFF, RELAY7_DELAY_OFF, RELAY8_DELAY_OFF};
+
+        InitProviderCb();
+
+        unsigned int _delay_on[8] = {RELAY1_DELAY_ON, RELAY2_DELAY_ON, RELAY3_DELAY_ON, RELAY4_DELAY_ON,\
+                                     RELAY5_DELAY_ON, RELAY6_DELAY_ON, RELAY7_DELAY_ON, RELAY8_DELAY_ON};
+        unsigned int _delay_off[8] = {RELAY1_DELAY_OFF, RELAY2_DELAY_OFF, RELAY3_DELAY_OFF, RELAY4_DELAY_OFF,\
+                                      RELAY5_DELAY_OFF, RELAY6_DELAY_OFF, RELAY7_DELAY_OFF, RELAY8_DELAY_OFF};
         for (unsigned char i=0; i < DUMMY_RELAY_COUNT; i++) {
-          _relays.push_back((relay_t) {0, RELAY_TYPE_NORMAL,0,_delay_on[i], _delay_off[i]});
+            _relays.push_back((relay_t) {_relaycb, GPIO_NONE, GPIO_NONE, GPIO_NONE, BTN_NONE,\
+                                         RELAY_TYPE_NORMAL,0,_delay_on[i], _delay_off[i],0});
         }
 
     #else
-
+                
         #if RELAY1_PIN != GPIO_NONE
-            _relays.push_back((relay_t) { RELAY1_PIN, RELAY1_TYPE, RELAY1_RESET_PIN, RELAY1_DELAY_ON, RELAY1_DELAY_OFF });
+            InitRelay(1);
         #endif
+
         #if RELAY2_PIN != GPIO_NONE
-            _relays.push_back((relay_t) { RELAY2_PIN, RELAY2_TYPE, RELAY2_RESET_PIN, RELAY2_DELAY_ON, RELAY2_DELAY_OFF });
+            InitRelay(2);
         #endif
+
         #if RELAY3_PIN != GPIO_NONE
-            _relays.push_back((relay_t) { RELAY3_PIN, RELAY3_TYPE, RELAY3_RESET_PIN, RELAY3_DELAY_ON, RELAY3_DELAY_OFF });
+            InitRelay(3);
         #endif
+
         #if RELAY4_PIN != GPIO_NONE
-            _relays.push_back((relay_t) { RELAY4_PIN, RELAY4_TYPE, RELAY4_RESET_PIN, RELAY4_DELAY_ON, RELAY4_DELAY_OFF });
+            InitRelay(4);
         #endif
+
         #if RELAY5_PIN != GPIO_NONE
-            _relays.push_back((relay_t) { RELAY5_PIN, RELAY5_TYPE, RELAY5_RESET_PIN, RELAY5_DELAY_ON, RELAY5_DELAY_OFF });
+            InitRelay(5);
         #endif
+
         #if RELAY6_PIN != GPIO_NONE
-            _relays.push_back((relay_t) { RELAY6_PIN, RELAY6_TYPE, RELAY6_RESET_PIN, RELAY6_DELAY_ON, RELAY6_DELAY_OFF });
+            InitRelay(6);
         #endif
+
         #if RELAY7_PIN != GPIO_NONE
-            _relays.push_back((relay_t) { RELAY7_PIN, RELAY7_TYPE, RELAY7_RESET_PIN, RELAY7_DELAY_ON, RELAY7_DELAY_OFF });
+            InitRelay(7);
         #endif
+
         #if RELAY8_PIN != GPIO_NONE
-            _relays.push_back((relay_t) { RELAY8_PIN, RELAY8_TYPE, RELAY8_RESET_PIN, RELAY8_DELAY_ON, RELAY8_DELAY_OFF });
+            InitRelay(8);
         #endif
 
     #endif

@@ -2658,6 +2658,12 @@
    // SUNRISE support
    #define SUNRISE_SUPPORT           1
 
+   #define SUNRISE1_RISE_OFS              (0)
+
+   #define SUNRISE1_SET_OFS               (0)
+
+
+
 #endif
 
 // -----------------------------------------------------------------------------

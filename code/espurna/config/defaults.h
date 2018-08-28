@@ -241,6 +241,84 @@
 #define RELAY8_PIN            GPIO_NONE
 #endif
 
+#ifndef RELAY1_PIN2
+#define RELAY1_PIN2            GPIO_NONE
+#endif
+#ifndef RELAY2_PIN2
+#define RELAY2_PIN2            GPIO_NONE
+#endif
+#ifndef RELAY3_PIN2
+#define RELAY3_PIN2            GPIO_NONE
+#endif
+#ifndef RELAY4_PIN2
+#define RELAY4_PIN2            GPIO_NONE
+#endif
+#ifndef RELAY5_PIN2
+#define RELAY5_PIN2            GPIO_NONE
+#endif
+#ifndef RELAY6_PIN2
+#define RELAY6_PIN2            GPIO_NONE
+#endif
+#ifndef RELAY7_PIN2
+#define RELAY7_PIN2            GPIO_NONE
+#endif
+#ifndef RELAY8_PIN2
+#define RELAY8_PIN2            GPIO_NONE
+#endif
+
+#ifndef RELAY1_PINP
+#define RELAY1_PINP            GPIO_NONE
+#endif
+#ifndef RELAY2_PINP
+#define RELAY2_PINP            GPIO_NONE
+#endif
+#ifndef RELAY3_PINP
+#define RELAY3_PINP            GPIO_NONE
+#endif
+#ifndef RELAY4_PINP
+#define RELAY4_PINP            GPIO_NONE
+#endif
+#ifndef RELAY5_PINP
+#define RELAY5_PINP            GPIO_NONE
+#endif
+#ifndef RELAY6_PINP
+#define RELAY6_PINP            GPIO_NONE
+#endif
+#ifndef RELAY7_PINP
+#define RELAY7_PINP            GPIO_NONE
+#endif
+#ifndef RELAY8_PINP
+#define RELAY8_PINP            GPIO_NONE
+#endif
+
+
+// relay  to press button
+#ifndef RELAY1_BUTTON
+#define RELAY1_BUTTON       0
+#endif
+#ifndef RELAY2_BUTTON
+#define RELAY2_BUTTON       0
+#endif
+#ifndef RELAY3_BUTTON
+#define RELAY3_BUTTON       0
+#endif
+#ifndef RELAY4_BUTTON
+#define RELAY4_BUTTON       0
+#endif
+#ifndef RELAY5_BUTTON
+#define RELAY5_BUTTON       0
+#endif
+#ifndef RELAY6_BUTTON
+#define RELAY6_BUTTON       0
+#endif
+#ifndef RELAY7_BUTTON
+#define RELAY7_BUTTON       0
+#endif
+#ifndef RELAY8_BUTTON
+#define RELAY8_BUTTON       0
+#endif
+
+
 #ifndef RELAY1_TYPE
 #define RELAY1_TYPE           RELAY_TYPE_NORMAL
 #endif
@@ -340,6 +418,32 @@
 #ifndef RELAY8_DELAY_OFF
 #define RELAY8_DELAY_OFF      0
 #endif
+
+#ifndef RELAY1_HBPULSE
+#define RELAY1_HBPULSE        100
+#endif
+#ifndef RELAY2_HBPULSE
+#define RELAY2_HBPULSE        100
+#endif
+#ifndef RELAY3_HBPULSE
+#define RELAY3_HBPULSE        100
+#endif
+#ifndef RELAY4_HBPULSE
+#define RELAY4_HBPULSE        100
+#endif
+#ifndef RELAY5_HBPULSE
+#define RELAY5_HBPULSE        100
+#endif
+#ifndef RELAY6_HBPULSE
+#define RELAY6_HBPULSE        100
+#endif
+#ifndef RELAY7_HBPULSE
+#define RELAY7_HBPULSE        100
+#endif
+#ifndef RELAY8_HBPULSE
+#define RELAY8_HBPULSE        100
+#endif
+
 
 // -----------------------------------------------------------------------------
 // LEDs

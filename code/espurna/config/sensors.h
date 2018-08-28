@@ -617,11 +617,11 @@
 #endif
 // signed char in minutes
 #ifndef SUNRISE1_RISE_OFS
-#define SUNRISE1_RISE_OFS              (5)
+#define SUNRISE1_RISE_OFS              (0)
 #endif
 // signed char in minutes
 #ifndef SUNRISE1_SET_OFS
-#define SUNRISE1_SET_OFS               (-5)
+#define SUNRISE1_SET_OFS               (0)
 #endif
 
 

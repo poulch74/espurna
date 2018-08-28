@@ -46,6 +46,7 @@
 #define BUTTON_SWITCH               1
 #define BUTTON_DEFAULT_HIGH         2
 #define BUTTON_SET_PULLUP           4
+#define BUTTON_ONCE                 8 // only one and once event fired from button
 #endif
 
 //------------------------------------------------------------------------------
@@ -61,6 +62,10 @@
 #define RELAY_TYPE_INVERSE          1
 #define RELAY_TYPE_LATCHED          2
 #define RELAY_TYPE_LATCHED_INVERSE  3
+
+#define RELAY_TYPE_HBRIDGE          4
+#define RELAY_TYPE_SOFTWARE         5
+#define RELAY_TYPE_BTNRESET         6
 
 #define RELAY_SYNC_ANY              0
 #define RELAY_SYNC_NONE_OR_ONE      1

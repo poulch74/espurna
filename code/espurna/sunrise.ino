@@ -9,7 +9,7 @@ extern "C" {
 #define _PI180 (0.01745329f) // pi/180
 #define _180PI (57.2957795f) // 180/pi
 #define _PI2   (1.5707963f) // half pi
-#define _PI18000 (0.0001745329f) // pi/18000
+#define _PI18000 (0.00017453f) // pi/18000
 
 #define fs_abs(x) ((x)<0 ? (-x):(x))
 
@@ -33,6 +33,8 @@ float fs_acos(float x)
     ret = ret - 2 * negate * ret;
     return negate * 3.141592654f + ret;
 }
+
+//#define fs_acos(x) acosf(x)
 
 float fs_atan2(float y, float x)
 {
@@ -60,6 +62,8 @@ float fs_atan2(float y, float x)
 
     return t3;
 }
+
+//#define fs_atan2(x,y) atan2f(x,y)
 
 static float zcos[] = {-0.01454,-0.10453,-0.20791,-0.30901};
 
@@ -97,7 +101,7 @@ int Sunrise::calc(int year, unsigned char  month, unsigned char  day, Zenith zen
     N2 = (month+9)/12;
     N3 = 1+((year-4*(year/4)+2)/3);
     doy = N1-(N2*N3)+day-30;
-    
+
     float t = doy - lngHour24;
     if(rs) t+=0.25f;
     else t+=0.75f;
@@ -108,8 +112,9 @@ int Sunrise::calc(int year, unsigned char  month, unsigned char  day, Zenith zen
 
     float L = M + (1.916f * fs_sin(Mr)) + (0.020f * fs_sin(2.0f * Mr)) + 282.634f;
     L = adjust(L,360);
-   
+
     float RA = fs_atan2(0.91764f * fs_sin(L*_PI180),fs_cos(L*_PI180))*_180PI;
+
     RA = adjust(RA,360);
 
     int Lquadrant  = L/90;
@@ -142,6 +147,7 @@ int Sunrise::calc(int year, unsigned char  month, unsigned char  day, Zenith zen
     //min=(int)(minutes-hr*60);
 
 // for test
+/*
     static int next = 0;
 
     if(rs) { //rise
@@ -151,7 +157,7 @@ int Sunrise::calc(int year, unsigned char  month, unsigned char  day, Zenith zen
     minutes=(int)(11+14*60)+next;
     next+=10;
     }
-  
+*/  
     return minutes;
 }
 
@@ -166,12 +172,12 @@ void _sunriseConfigure()
 {
     _sunrise_configure = false;
     int offset = getSetting("ntpOffset", NTP_TIME_OFFSET).toInt();
-    int lat = (int)(100.0*getSetting("ntpLatitude", NTP_LATITUDE).toFloat());
-    int lon = (int)(100.0*getSetting("ntpLongitude", NTP_LONGITUDE).toFloat());
+    int lat = (int)(getSetting("ntpLatitude", NTP_LATITUDE).toFloat()*100.0f);
+    int lon = (int)(getSetting("ntpLongitude", NTP_LONGITUDE).toFloat()*100.0f);
 
     DEBUG_MSG_P(PSTR("[SUNRISE] Time zone : %d\n"), offset);
-    DEBUG_MSG_P(PSTR("[SUNRISE] Latitude : %d.%d\n"), lat/100,lat%100);
-    DEBUG_MSG_P(PSTR("[SUNRISE] Longitude : %d.%d\n"), lon/100,lon%100);
+    DEBUG_MSG_P(PSTR("[SUNRISE] Latitude : %d\n"), lat);
+    DEBUG_MSG_P(PSTR("[SUNRISE] Longitude : %d\n"), lon);
     if((lat!=sun.get_lat()) || (lon!=sun.get_lon()) || (offset!=sun.get_tzm())) {
         DEBUG_MSG_P(PSTR("[SUNRISE] Recalc forced\n"));
         sun.begin(lat,lon,offset);
