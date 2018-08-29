@@ -19,6 +19,19 @@ It uses the Arduino Core for ESP8266 framework and a number of 3rd party librari
 
 > Please use the [gitter ESPurna channel](https://gitter.im/tinkerman-cat/espurna) for support and questions, you have better chances to get fast answers from me or other ESPurna users. Open an issue here only if you feel there is a bug or you want to request an enhancement. Thank you.
 
+## Additioanl features in poulch74 branch
+* debounceevent(-once) library fork from this repo must be used for this branch. (added ONCE type button - for alarm scenario usage)
+* NtpClientLib fork from this repo must be used for this branch. (added parameter to skip internal setSyncProvider call)
+* RTC support for ds3231 rtc clock with NTP sync. see RTC folder and rtc.ino
+* custom Vcc monitoring (utils.ino custom_getVcc function)
+* some code modifications for debug output with more gently HEAP usage (see DEBUG_MSG_APPEND_* in debug.h). So debug messages and 
+  HELP command show all content...
+* some rewrites in relay module. added H-bridge relay support.Relay action provider - now callbacks in RELAY folder.
+  relay can be binded to button (new button type ONCE added, so relay switch can reset binded button to nonsignaled state - for alarm     usage scenario)
+* In WebUI add Latitude/Longitude setup in NTP page.
+* add Sunrise/set calculation subsystem and SunriseSensor in SENSORS. Sensor can be binded to relay.
+
+
 ## Features
 
 * *KRACK* vulnerability free (when built with Arduino Core >= 2.4.0)
