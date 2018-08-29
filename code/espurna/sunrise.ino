@@ -34,8 +34,6 @@ float fs_acos(float x)
     return negate * 3.141592654f + ret;
 }
 
-//#define fs_acos(x) acosf(x)
-
 float fs_atan2(float y, float x)
 {
     float t0, t1, t2, t3, t4;
@@ -62,8 +60,6 @@ float fs_atan2(float y, float x)
 
     return t3;
 }
-
-//#define fs_atan2(x,y) atan2f(x,y)
 
 static float zcos[] = {-0.01454,-0.10453,-0.20791,-0.30901};
 
