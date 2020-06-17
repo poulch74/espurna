@@ -162,7 +162,7 @@
 //#define TONBUX_XSSSA06
 //#define TUYA_GENERIC_DIMMER
 //#define VANZAVANZU_SMART_WIFI_PLUG_MINI
-//#define WEMOS_D1_MINI
+#define WEMOS_D1_MINI
 //#define WEMOS_D1_MINI_RELAYSHIELD
 //#define WEMOS_D1_TARPUNA_SHIELD
 //#define WION_50055
@@ -190,7 +190,7 @@
 //#define DOMOTICZ_SUPPORT       0
 //#define ENCODER_SUPPORT        1
 //#define HOMEASSISTANT_SUPPORT  0
-//#define I2C_SUPPORT            1
+#define I2C_SUPPORT            1
 //#define INFLUXDB_SUPPORT       1
 //#define IR_SUPPORT             1
 //#define LED_SUPPORT            0

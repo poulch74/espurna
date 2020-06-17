@@ -17,3 +17,4 @@ custom.h
 .vscode
 _pycache_/
 *.py[cod]
+build

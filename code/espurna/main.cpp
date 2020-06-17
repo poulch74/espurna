@@ -232,11 +232,11 @@ void setup() {
     #if SSDP_SUPPORT
         ssdpSetup();
     #endif
-    #if NTP_SUPPORT
-        ntpSetup();
-    #endif
     #if I2C_SUPPORT
         i2cSetup();
+    #endif
+    #if NTP_SUPPORT
+        ntpSetup();
     #endif
     #if RF_SUPPORT
         rfbSetup();

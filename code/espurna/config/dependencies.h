@@ -186,7 +186,7 @@
 #if NTP_SUPPORT && defined(ARDUINO_ESP8266_RELEASE_2_3_0)
 #define NTP_LEGACY_SUPPORT 1
 #else
-#define NTP_LEGACY_SUPPORT 0
+#define NTP_LEGACY_SUPPORT 1
 #endif
 
 //------------------------------------------------------------------------------

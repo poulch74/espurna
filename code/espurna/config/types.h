@@ -420,3 +420,11 @@
 
 #define GPIO_NONE           0x99
 #define RELAY_NONE          0x99
+
+
+//-----------------------------------------------------------------------------
+// RTC providers
+//-----------------------------------------------------------------------------
+#define RTC_PROVIDER_DUMMY          0
+#define RTC_PROVIDER_DS3231         1
+#define RTC_PROVIDER_DS1307         2

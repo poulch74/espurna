@@ -12,6 +12,8 @@ Copyright (C) 2016-2019 by Xose Pérez <xose dot perez at gmail dot com>
 
 #include <Ticker.h>
 
+#include "config/rtc.h"
+
 #include "debug.h"
 #include "broker.h"
 #include "ws.h"
@@ -145,7 +147,6 @@ void _ntpStart() {
     _ntp_want_sync = false;
 
     setSyncInterval(NTPw.getShortInterval());
-
 }
 
 
@@ -153,13 +154,13 @@ void _ntpReport() {
 
     _ntp_report = false;
 
-    #if DEBUG_SUPPORT
+//    #if DEBUG_SUPPORT
     if (ntpSynced()) {
         time_t t = now();
         DEBUG_MSG_P(PSTR("[NTP] UTC Time  : %s\n"), ntpDateTime(ntpLocal2UTC(t)).c_str());
         DEBUG_MSG_P(PSTR("[NTP] Local Time: %s\n"), ntpDateTime(t).c_str());
     }
-    #endif
+  //  #endif
 
 }
 
@@ -178,7 +179,7 @@ void inline _ntpBroker() {
 void _ntpLoop() {
 
     // Disable ntp sync when softAP is active. This will not crash, but instead spam debug-log with pointless sync failures.
-    if (!wifiConnected()) return;
+    //if (!wifiConnected()) return;
 
     if (_ntp_configure) _ntpConfigure();
 
@@ -214,13 +215,18 @@ void _ntpBackwards() {
 
 bool ntpSynced() {
     #if NTP_WAIT_FOR_SYNC
-        // Has synced at least once
-        return (NTPw.getFirstSync() > 0);
+        #if RTC_SUPPORT
+            return (year() > 2019);
+        #else
+            // Has synced at least once
+            return (NTPw.getFirstSync() > 0);
+        #endif            
     #else
         // TODO: runtime setting?
         return true;
     #endif
 }
+
 
 String ntpDateTime(time_t t) {
     char buffer[20];
@@ -245,6 +251,25 @@ time_t ntpLocal2UTC(time_t local) {
 
 // -----------------------------------------------------------------------------
 
+#if RTC_SUPPORT && TERMINAL_SUPPORT
+
+String _rtc_getValue(String data, char sep, int idx) {
+    int found = 0;
+    int si[] = {0, -1};
+    int maxi = data.length()-1;
+
+    for(int i=0; i<=maxi && found<=idx; i++) {
+        if(data.charAt(i)==sep || i==maxi) {
+            found++;
+            si[0] = si[1]+1;
+            si[1] = (i == maxi) ? i+1 : i;
+        }
+    }
+    return found>idx ? data.substring(si[0], si[1]) : "0";
+}
+
+#endif
+
 void ntpSetup() {
 
     _ntpBackwards();
@@ -259,6 +284,44 @@ void ntpSetup() {
             }
         });
 
+        #if RTC_SUPPORT
+        terminalRegisterCommand(F("RTC"), [](const terminal::CommandContext&) {
+            time_t t = getTime_rtc();
+            DEBUG_MSG_P(PSTR("[NTP] GET RTC Local Time: %s\n"), (char *) ntpDateTime(t).c_str());
+            terminalOK();
+        });
+
+        terminalRegisterCommand(F("RTC.SET"), [](const terminal::CommandContext& ctx) {
+        
+            time_t t;
+            tmElements_t tm;
+
+            if (ctx.argc >3)
+            {
+                String sdate = String(ctx.argv[1]);
+                String sdow = String(ctx.argv[2]);
+                String stime = String(ctx.argv[3]);
+
+                tm.Second = _rtc_getValue(stime,':',2).toInt();
+                tm.Minute = _rtc_getValue(stime,':',1).toInt();
+                tm.Hour   = _rtc_getValue(stime,':',0).toInt();
+
+                tm.Wday = sdow.toInt();
+
+                tm.Day   = _rtc_getValue(sdate,'-',2).toInt();
+                tm.Month = _rtc_getValue(sdate,'-',1).toInt();
+                tm.Year  = y2kYearToTm(_rtc_getValue(sdate,'-',0).toInt()-2000);
+
+                t = makeTime(tm);
+                setTime_rtc(t);
+                setTime(t);
+
+                DEBUG_MSG_P(PSTR("[NTP] SET RTC Local Time: %s\n"), (char *) ntpDateTime(t).c_str());
+                terminalOK();
+            }
+        });
+        #endif
+
         terminalRegisterCommand(F("NTP.SYNC"), [](const terminal::CommandContext&) {
             _ntpWantSync();
             terminalOK();
@@ -272,12 +335,25 @@ void ntpSetup() {
             } else if (error == invalidAddress) {
                 DEBUG_MSG_P(PSTR("[NTP] Error: Invalid NTP server address\n"));
             }
+
+            #if RTC_SUPPORT
+                // get rtc time if ntp fail
+                time_t ts = getTime_rtc();
+                setTime(ts);
+                _ntp_report = true;
+                DEBUG_MSG_P(PSTR("[NTP] Get Time from RTC\n"));
+                setSyncInterval(300);  //NTPw.gettLongInterval());
+            #endif
+
             #if WEB_SUPPORT
                 wsPost(_ntpWebSocketOnData);
             #endif
         } else {
             _ntp_report = true;
             setTime(NTPw.getLastNTPSync());
+            #if RTC_SUPPORT && RTC_NTP_SYNC_ENA
+                setTime_rtc(now());
+            #endif
         }
     });
 
@@ -287,6 +363,17 @@ void ntpSetup() {
                 _ntp_defer.once(secureRandom(NTP_START_DELAY, NTP_START_DELAY * 2), _ntpWantSync);
             }
         }
+        #if RTC_SUPPORT
+        // sync with rtc in AP mode
+        else
+        {
+            if(code == MESSAGE_ACCESSPOINT_CREATED)  {
+                if (!ntpSynced()) {
+                    _ntp_defer.once(secureRandom(NTP_START_DELAY, NTP_START_DELAY * 2), _ntpWantSync);
+                }
+            }
+        }
+        #endif
     });
 
     #if WEB_SUPPORT
