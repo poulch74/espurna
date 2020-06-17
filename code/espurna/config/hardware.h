@@ -161,9 +161,9 @@
     #define I2C_SDA_PIN         4  // D2
     #define I2C_SCL_PIN         5  // D1
 
-    #define RTC_SUPPORT         1               // enable battery backed RTC for ntp
-    #define RTC_PROVIDER        RTC_PROVIDER_DS3231 //RTC_DUMMY
-    #define RTC_NTP_SYNC_ENA	0               // enable sync RTC on NTP sync success
+//    #define RTC_SUPPORT         1               // enable battery backed RTC for ntp
+//    #define RTC_PROVIDER        RTC_PROVIDER_DS3231 //RTC_DUMMY
+//    #define RTC_NTP_SYNC_ENA	0               // enable sync RTC on NTP sync success
 
 
 #elif defined(WEMOS_D1_MINI_RELAYSHIELD)
@@ -385,6 +385,15 @@
     // LEDs
     #define LED1_PIN            13
     #define LED1_PIN_INVERSE    1
+
+    #define I2C_SDA_PIN         1  // D2
+    #define I2C_SCL_PIN         3  // D1
+
+
+    #define RTC_SUPPORT         1               // enable battery backed RTC for ntp
+    #define RTC_PROVIDER        RTC_PROVIDER_DS3231 //RTC_DUMMY
+    #define RTC_NTP_SYNC_ENA	0               // enable sync RTC on NTP sync success
+
 
 #elif defined(ITEAD_SONOFF_TH)
 
