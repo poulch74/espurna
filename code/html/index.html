@@ -12,7 +12,7 @@
         <link rel="stylesheet" href="vendor/pure-grids-responsive-1.0.0.min.css" />
         <link rel="stylesheet" href="vendor/side-menu.css" />
         <!-- removeIf(!light) -->
-        <link rel="stylesheet" href="vendor/jquery.wheelcolorpicker-3.0.3.css" />
+        <link rel="stylesheet" href="vendor/jquery.wheelcolorpicker-3.0.8.css" />
         <!-- endRemoveIf(!light) -->
         <!-- removeIf(!rfm69) -->
         <link rel="stylesheet" href="vendor/datatables-1.10.16.css" />
@@ -28,40 +28,45 @@
 
             <div class="content">
 
-                <form id="formPassword" class="pure-form" action="/" method="post">
+                <form id="formPassword" class="pure-form" autocomplete="off">
 
-                    <div class="panel block">
+                    <div class="panel block" id="panel-password">
 
                         <div class="header">
                             <h1>SECURITY</h1>
-                            <h2>Before using this device you have to change the default password for the user 'admin'. This password will be used for the <strong>AP mode hotspot</strong>, the <strong>web interface</strong> (where you are now) and the <strong>over-the-air updates</strong>.</h2>
+                            <h2>Before using this device you have to change the default password for the user <strong>admin</strong>. This password will be used for the <strong>AP mode hotspot</strong>, the <strong>web interface</strong> (where you are now) and the <strong>over-the-air updates</strong>.</h2>
                         </div>
 
                         <div class="page">
 
                             <fieldset>
-
                                 <div class="pure-g">
-                                    <label class="pure-u-1 pure-u-lg-1-4">Admin password</label>
-                                    <input name="adminPass" class="pure-u-1 pure-u-lg-3-4" type="password" tabindex="1" autocomplete="false" />
-                                    <div class="pure-u-0 pure-u-lg-1-4"></div>
-                                    <div class="pure-u-1 pure-u-lg-3-4 hint">
-                                        The administrator password is used to access this web interface (user 'admin'), but also to connect to the device when in AP mode or to flash a new firmware over-the-air (OTA).<br />
-                                        It must have at least <strong>five characters</strong> (numbers and letters and any of these special characters: _,.;:~!?@#$%^&amp;*&lt;&gt;\|(){}[]) and at least <strong>one lowercase</strong> and <strong>one uppercase</strong> or <strong>one number</strong>.</div>
+                                    <label class="pure-u-1 pure-u-lg-1-4" for="adminPass1">New Password</label>
+                                    <input class="pure-u-1 pure-u-lg-3-4" name="adminPass1" data-settings-real-name="adminPass" minlength="8" maxlength="63" type="password" tabindex="1" autocomplete="false" spellcheck="false" required />
+                                    <span class="no-select password-reveal"></span>
                                 </div>
 
                                 <div class="pure-g">
-                                    <label class="pure-u-1 pure-u-lg-1-4">Repeat password</label>
-                                    <input name="adminPass" class="pure-u-1 pure-u-lg-3-4" type="password" tabindex="2" autocomplete="false" />
+                                    <label class="pure-u-1 pure-u-lg-1-4" for="adminPass2">Repeat password</label>
+                                    <input class="pure-u-1 pure-u-lg-3-4" name="adminPass2" data-settings-real-name="adminPass" minlength="8" maxlength="63" type="password" tabindex="2" autocomplete="false" spellcheck="false" required />
+                                    <span class="no-select password-reveal"></span>
                                 </div>
-
-                                <div class="pure-u-0 pure-u-lg-1-4 more"></div>
-                                <button class="pure-button button-update-password" type="button">Update</button>
-
                             </fieldset>
+
+                            <div class="pure-g">
+                                <div class="pure-u-1 pure-u-lg-1 hint">
+                                    Password must be <strong>8..63 characters</strong> (numbers and letters and any of these special characters: _,.;:~!?@#$%^&amp;*&lt;&gt;\|(){}[]) and have at least <strong>one lowercase</strong> and <strong>one uppercase</strong> or <strong>one number</strong>.</div>
+                            </div>
+
+
+                            <div class="pure-g">
+                                <button class="pure-u-11-24 pure-u-lg-1-4 pure-button button-generate-password" type="button" title="Generate password based on password policy">Generate</button>
+                                <div class="pure-u-2-24 pure-u-lg-1-2"></div>
+                                <button class="pure-u-11-24 pure-u-lg-1-4 pure-button button-update-password" type="button" title="Save new password">Save</button>
+                            </div>
+
                         </div>
                     </div>
-
                 </form>
 
             </div> <!-- content -->
@@ -79,6 +84,7 @@
 
                     <span class="pure-menu-heading" name="hostname">HOSTNAME</span>
                     <span class="pure-menu-heading small" name="title">ESPurna 0.0.0</span>
+                    <span class="pure-menu-heading small" name="desc"></span>
 
                     <ul class="pure-menu-list">
 
@@ -90,6 +96,24 @@
                             <a href="#" class="pure-menu-link" data="panel-general">GENERAL</a>
                         </li>
 
+                        <!-- removeIf(!curtain) -->
+                        <li class="pure-menu-item module module-curtain">
+                            <a href="#" class="pure-menu-link" data="panel-curtain">CURTAIN</a>
+                        </li>
+                        <!-- endRemoveIf(!curtain) -->
+
+                        <!-- removeIf(!thermostat) -->
+                        <li class="pure-menu-item module module-thermostat">
+                            <a href="#" class="pure-menu-link" data="panel-thermostat">THERMOSTAT</a>
+                        </li>
+                        <!-- endRemoveIf(!thermostat) -->
+
+                        <!-- removeIf(!lightfox) -->
+                        <li class="pure-menu-item module module-lightfox">
+                            <a href="#" class="pure-menu-link" data="panel-lightfox">LIGHTFOX RF</a>
+                        </li>
+                        <!-- endRemoveIf(!lightfox) -->
+
                         <li class="pure-menu-item module module-dcz">
                             <a href="#" class="pure-menu-link" data="panel-domoticz">DOMOTICZ</a>
                         </li>
@@ -100,6 +124,10 @@
 
                         <li class="pure-menu-item module module-idb">
                             <a href="#" class="pure-menu-link" data="panel-idb">INFLUXDB</a>
+                        </li>
+
+                        <li class="pure-menu-item module module-led">
+                            <a href="#" class="pure-menu-link" data="panel-led">LED</a>
                         </li>
 
                         <!-- removeIf(!light) -->
@@ -122,6 +150,10 @@
                             <a href="#" class="pure-menu-link" data="panel-mqtt">MQTT</a>
                         </li>
 
+                        <li class="pure-menu-item module module-nofuss">
+                            <a href="#" class="pure-menu-link" data="panel-nofuss">NOFUSS</a>
+                        </li>
+
                         <li class="pure-menu-item module module-ntp">
                             <a href="#" class="pure-menu-link" data="panel-ntp">NTP</a>
                         </li>
@@ -132,13 +164,17 @@
                         </li>
                         <!-- endRemoveIf(!rfbridge) -->
 
+                        <li class="pure-menu-item module module-rpn">
+                            <a href="#" class="pure-menu-link" data="panel-rpn">RULES</a>
+                        </li>
+
                         <li class="pure-menu-item module module-sch">
                             <a href="#" class="pure-menu-link" data="panel-schedule">SCHEDULE</a>
                         </li>
 
                         <!-- removeIf(!sensor) -->
-                        <li class="pure-menu-item module module-sensors">
-                            <a href="#" class="pure-menu-link" data="panel-sensors">SENSORS</a>
+                        <li class="pure-menu-item module module-sns">
+                            <a href="#" class="pure-menu-link" data="panel-sns">SENSORS</a>
                         </li>
                         <!-- endRemoveIf(!sensor) -->
 
@@ -171,10 +207,11 @@
                     </div>
 
                     <div class="footer">
-                        &copy; 2016-2018<br />
+                        &copy; 2016-2019<br />
                         Xose Pérez<br/>
-                        <a href="http://tinkerman.cat" target="_blank">http://tinkerman.cat</a><br/>
-                        <a href="https://github.com/xoseperez/espurna" target="_blank">ESPurna @ GitHub</a><br/>
+                        <a href="https://twitter.com/xoseperez" rel="noopener" target="_blank">@xoseperez</a><br/>
+                        <a href="http://tinkerman.cat" rel="noopener" target="_blank">http://tinkerman.cat</a><br/>
+                        <a href="https://github.com/xoseperez/espurna" rel="noopener" target="_blank">ESPurna @ GitHub</a><br/>
                         GPLv3 license<br/>
                     </div>
 
@@ -197,6 +234,10 @@
 
                                 <div id="relays"></div>
 
+                                <!-- removeIf(!curtain) -->
+                                <div id="curtains"></div>
+                                <!-- endRemoveIf(!curtain) -->
+                                
                                 <!-- removeIf(!light) -->
                                 <div id="colors"></div>
                                 <div id="cct"></div>
@@ -244,6 +285,9 @@
 
                                     <div class="pure-u-1-2">Firmware version</div>
                                     <div class="pure-u-11-24"><span class="right" name="app_version"></span></div>
+
+                                    <div class="pure-u-1-2">Firmware revision</div>
+                                    <div class="pure-u-11-24"><span class="right" name="app_revision"></span></div>
 
                                     <div class="pure-u-1-2">Firmware build date</div>
                                     <div class="pure-u-11-24"><span class="right" name="app_build"></span></div>
@@ -305,8 +349,7 @@
                     </div>
                 </div>
 
-                <form id="formSave" class="pure-form" action="/" method="post" enctype="multipart/form-data">
-
+                <form id="form-general" class="pure-form form-settings">
                     <div class="panel" id="panel-general">
 
                         <div class="header">
@@ -320,7 +363,7 @@
 
                                 <div class="pure-g">
                                     <label class="pure-u-1 pure-u-lg-1-4">Hostname</label>
-                                    <input name="hostname" class="pure-u-1 pure-u-lg-1-4"  maxlength="32" type="text" action="reboot" tabindex="1" />
+                                    <input name="hostname" class="pure-u-1 pure-u-lg-1-4"  maxlength="31" type="text" action="reboot" tabindex="1" />
                                     <div class="pure-u-0 pure-u-lg-1-2"></div>
                                     <div class="pure-u-0 pure-u-lg-1-4"></div>
                                     <div class="pure-u-1 pure-u-lg-3-4 hint">
@@ -331,42 +374,26 @@
                                 </div>
 
                                 <div class="pure-g">
-                                    <label class="pure-u-1 pure-u-lg-1-4">Double click delay</label>
-                                    <input name="btnDelay" class="pure-u-1 pure-u-lg-1-4" type="number" action="reboot" min="0" step="100" max="1000" tabindex="6" />
-                                    <div class="pure-u-0 pure-u-lg-1-2"></div>
+                                    <label class="pure-u-1 pure-u-lg-1-4">Description</label>
+                                    <input name="desc" class="pure-u-1 pure-u-lg-3-4"  maxlength="64" type="text" tabindex="2" />
                                     <div class="pure-u-0 pure-u-lg-1-4"></div>
                                     <div class="pure-u-1 pure-u-lg-3-4 hint">
-                                        Delay in milliseconds to detect a double click (from 0 to 1000ms).<br />
-                                        The lower this number the faster the device will respond to button clicks but the harder it will be to get a double click.
-                                        Increase this number if you are having trouble to double click the button.
-                                        Set this value to 0 to disable double click. You won't be able to set the device in AP mode manually but your device will respond immediately to button clicks.<br />
-                                        You will have to <strong>reboot the device</strong> after updating for this setting to apply.
+                                        Human-friendly name for your device. Will be reported with the heartbeat.<br />
+                                        You can use this to specify the location or some other identification information.
                                     </div>
                                 </div>
 
-                                <div class="pure-g module module-led">
-                                    <label class="pure-u-1 pure-u-lg-1-4">LED mode</label>
-                                    <select name="ledMode0" class="pure-u-1 pure-u-lg-1-4" tabindex="7">
-                                        <option value="1">WiFi status</option>
-                                        <option value="8">Relay status</option>
-                                        <option value="0">MQTT managed</option>
-                                        <option value="4">Find me</option>
-                                        <option value="9">Relay &amp; WiFi</option>
-                                        <option value="5">Find me &amp; WiFi</option>
-                                        <option value="6">Always ON</option>
-                                        <option value="7">Always OFF</option>
-                                    </select>
+                                <div class="pure-g module module-btn">
+                                    <label class="pure-u-1 pure-u-lg-1-4">Click repeat delay</label>
+                                    <input name="btnRepDel" class="pure-u-1 pure-u-lg-1-4" type="number" action="reboot" min="0" step="100" max="1000" tabindex="6" />
                                     <div class="pure-u-0 pure-u-lg-1-2"></div>
                                     <div class="pure-u-0 pure-u-lg-1-4"></div>
                                     <div class="pure-u-1 pure-u-lg-3-4 hint">
-                                        This setting defines the behaviour of the main LED in the board.<br />
-                                        When in "WiFi status" it will blink at 1Hz when trying to connect. If successfully connected it will briefly blink every 5 seconds if in STA mode or every second if in AP mode.<br />
-                                        When in "Relay status" mode the LED will be ON whenever any relay is ON, and OFF otherwise. This is global status notification.<br />
-                                        When in "MQTT managed" mode you will be able to set the LED state sending a message to "&lt;base_topic&gt;/led/0/set" with a payload of 0, 1 or 2 (to toggle it).<br />
-                                        When in "Find me" mode the LED will be ON when all relays are OFF. This is meant to locate switches at night.<br />
-                                        When in "Relay &amp; WiFi" mode it will follow the WiFi status but will stay mostly off when relays are OFF, and mostly ON when any of them is ON.<br />
-                                        When in "Find me &amp; WiFi" mode is the opposite of the "Relay &amp; WiFi", it will follow the WiFi status but will stay mostly on when relays are OFF, and mostly OFF when any of them is ON.<br />
-                                        "Always ON" and "Always OFF" modes are self-explanatory.
+                                        Delay in milliseconds to detect a double or triple click (from 0 to 1000ms).<br />
+                                        The lower this number the faster the device will respond to button clicks but the harder it will be to get the expected event.
+                                        Increase this number if you are having trouble triggering the event.
+                                        Set this value to 0 to disable repeat detection, device will respond immediately to a single button click. When using default configuration, consider that this will disable the SoftAP button action.<br />
+                                        You will have to <strong>reboot the device</strong> to apply this setting.
                                     </div>
                                 </div>
 
@@ -375,10 +402,64 @@
                                     <div class="pure-u-1 pure-u-lg-1-4"><input type="checkbox" name="alexaEnabled" /></div>
                                 </div>
 
+                                <div class="pure-g module module-alexa">
+                                    <label class="pure-u-1 pure-u-lg-1-4">Alexa device name</label>
+                                    <input name="alexaName" class="pure-u-1 pure-u-lg-1-4"  maxlength="31" type="text" action="reboot" tabindex="7" />
+                                    <div class="pure-u-0 pure-u-lg-1-2"></div>
+                                    <div class="pure-u-0 pure-u-lg-1-4"></div>
+                                    <div class="pure-u-1 pure-u-lg-3-4 hint">
+                                        This name will be used in Alexa integration.<br />
+                                    </div>
+                                </div>
+
+
+                            </fieldset>
+
+                        </div>
+                    </div>
+                </form>
+
+                <form id="form-led" class="pure-form form-settings">
+                    <div class="panel" id="panel-led">
+
+                        <div class="header">
+                            <h1>LED</h1>
+                            <h2>Notification LED configuration</h2>
+                        </div>
+
+                        <div class="page">
+
+                            <details>
+
+                            <summary><legend class="module module-led">Available modes</legend></summary>
+
+                            <br/>
+                            <div class="pure-g module module-led">
+                                <div class="pure-u-1 pure-u-lg-3-4 hint">
+                                    <li><strong>WiFi status</strong> will blink at 1Hz when trying to connect. If successfully connected it will briefly blink every 5 seconds if in STA mode or every second if in AP mode.</li>
+                                    <li><strong>Follow switch</strong> will force the LED to follow the status of a given switch (you must define which switch to follow in the side field).</li>
+                                    <li><strong>Inverse switch</strong> will force the LED to not-follow the status of a given switch (you must define which switch to follow in the side field).</li>
+                                    <li><strong>Find me</strong> will turn the LED ON when all switches are OFF. This is meant to locate switches at night.</li>
+                                    <li><strong>Find me &amp; WiFi</strong> will follow the WiFi status but will stay mostly on when switches are OFF, and mostly OFF when any of them is ON.</li>
+                                    <li><strong>Switches status</strong> will turn the LED ON whenever any switch is ON, and OFF otherwise. This is global status notification.</li>
+                                    <li><strong>Switches status &amp; WiFi</strong> will follow the WiFi status but will stay mostly off when switches are OFF, and mostly ON when any of them is ON.</li>
+                                    <li><strong>Manually managed</strong> will let you manage the LED status via MQTT by sending a message to "&lt;base_topic&gt;/led/0/set" with a payload of 0, 1 or 2 (to toggle it).</li>
+                                    <li><strong>Always ON</strong> and <strong>Always OFF</strong> modes are self-explanatory.</li>
+                                </div>
+                            </div>
+
+                            </details>
+
+                            <fieldset>
+
+                                <div id="ledConfig"></div>
+
                             </fieldset>
                         </div>
                     </div>
+                </form>
 
+                <form id="form-relay" class="pure-form form-settings">
                     <div class="panel" id="panel-relay">
 
                         <div class="header">
@@ -399,6 +480,7 @@
                                         <option value="1">Zero or one switches active</option>
                                         <option value="2">One and just one switch active</option>
                                         <option value="3">All synchronised</option>
+                                        <option value="4">Switch #0 controls other switches</option>
                                     </select>
                                     <div class="pure-u-0 pure-u-lg-1-4"></div>
                                     <div class="pure-u-1 pure-u-lg-3-4 hint">Define how the different switches should be synchronized.</div>
@@ -410,8 +492,58 @@
 
                         </div>
                     </div>
+                </form>
 
-                    <!-- removeIf(!light) -->
+                <!-- removeIf(!curtain) -->
+                <form id="form-curtain" class="pure-form form-settings">
+                    <div class="panel" id="panel-curtain">
+
+                        <div class="header">
+                            <h1>CURTAIN</h1>
+                            <h2>Curtain configuration</h2>
+                        </div>
+
+                        <div class="page">
+
+                            <fieldset>
+
+                                <legend class="module module-curtain">General</legend>
+
+                                <div class="pure-g module module-curtain">
+                                    <label class="pure-u-1 pure-u-lg-1-4">Curtain type</label>
+                                    <select class="pure-u-1 pure-u-lg-1-4" name="curtainType" tabindex="3">
+                                        <option value="0">Roller</option>
+                                        <option value="1">Closing right</option>
+                                        <option value="2">Closing left</option>
+                                        <option value="3">Two sides</option>
+                                    </select>
+                                    <div class="pure-u-0 pure-u-lg-1-4"></div>
+                                    <div class="pure-u-1 pure-u-lg-3-4 hint">Define your curtain type. It adapts the graphical view in status menu.</div>
+                                </div>
+
+                                <div class="pure-g module module-curtain">
+                                    <label class="pure-u-1 pure-u-lg-1-4">Curtain bootup position</label>
+                                    <select class="pure-u-1 pure-u-lg-1-4" name="curtainBoot" tabindex="3">
+                                        <option value="0">Do nothing</option>
+                                        <option value="1">Closed</option>
+                                        <option value="2">Opened</option>
+                                        <option value="3">Last set position</option>
+                                    </select>
+                                    <div class="pure-u-0 pure-u-lg-1-4"></div>
+                                    <div class="pure-u-1 pure-u-lg-3-4 hint">Define the initial position of the curtain after a reboot or power loss.</div>
+                                </div>
+
+                                <div id="curtainConfig"></div>
+
+                            </fieldset>
+
+                        </div>
+                    </div>
+                </form>
+                <!-- endRemoveIf(!curtain) -->
+
+                <!-- removeIf(!light) -->
+                <form id="form-color" class="pure-form form-settings">
                     <div class="panel" id="panel-color">
 
                         <div class="header">
@@ -444,7 +576,7 @@
                                     <div class="pure-u-1 pure-u-lg-1-4"><input type="checkbox" name="useWhite" action="reload" tabindex="9" /></div>
                                     <div class="pure-u-0 pure-u-lg-1-2"></div>
                                     <div class="pure-u-0 pure-u-lg-1-4"></div>
-                                    <div class="pure-u-1 pure-u-lg-3-4 hint">Use forth dimmable channel as (cold) white light calculated out of the RGB values.<br />Will only work if the device has at least 4 dimmable channels.<br />Enabling this will render useless the "Channel 4" slider in the status page.<br />Reload the page to update the web interface.</div>
+                                    <div class="pure-u-1 pure-u-lg-3-4 hint">For 2 channels warm white and cold white lights or color lights to use forth dimmable channel as (cold) white light calculated out of the RGB values.<br />Will only work if the device has at least 4 dimmable channels.<br />Enabling this will render useless the "Channel 4" slider in the status page.<br />Reload the page to update the web interface.</div>
                                 </div>
 
                                 <div class="pure-g">
@@ -452,7 +584,7 @@
                                     <div class="pure-u-1 pure-u-lg-1-4"><input type="checkbox" name="useCCT" action="reload" tabindex="10" /></div>
                                     <div class="pure-u-0 pure-u-lg-1-2"></div>
                                     <div class="pure-u-0 pure-u-lg-1-4"></div>
-                                    <div class="pure-u-1 pure-u-lg-3-4 hint">Use fifth dimmable channel as warm white light and the forth dimmable channel as cold white.<br />Will only work if the device has at least 5 dimmable channels and "white channel" above is also ON.<br />Enabling this will render useless the "Channel 5" slider in the status page.<br />Reload the page to update the web interface.</div>
+                                    <div class="pure-u-1 pure-u-lg-3-4 hint">Use a dimmable channel as warm white light and another dimmable channel as cold white light.<br />On devices with two dimmable channels the first use used for warm white light and the second for cold white light.<br />On color lights the fifth use used for warm white light and the fourth for cold white light.<br />Will only work if the device has exactly 2 dimmable channels or at least 5 dimmable channels and "white channel" above is also ON.<br />Enabling this will render useless the "Channel 5" slider in the status page.<br />Reload the page to update the web interface.</div>
                                 </div>
 
                                 <div class="pure-g">
@@ -468,7 +600,12 @@
                                     <div class="pure-u-1 pure-u-lg-1-4"><input type="checkbox" name="useCSS" tabindex="12" /></div>
                                     <div class="pure-u-0 pure-u-lg-1-2"></div>
                                     <div class="pure-u-0 pure-u-lg-1-4"></div>
-                                    <div class="pure-u-1 pure-u-lg-3-4 hint">Use CSS style to report colors to MQTT and REST API. <br />Red will be reported as "#FF0000" if ON, otherwise "255,0,0"</div>
+                                    <div class="pure-u-1 pure-u-lg-3-4 hint">
+                                        <div class="module module-ha">
+                                            <strong>WARNING! </strong>Incompatible with Home Assistant MQTT integration
+                                        </div>
+                                        Use CSS style to report colors to MQTT and REST API. <br />Red will be reported as "#FF0000" if ON, otherwise "255,0,0"
+                                    </div>
                                 </div>
 
                                 <div class="pure-g">
@@ -497,8 +634,10 @@
                             </fieldset>
                         </div>
                     </div>
-                    <!-- endRemoveIf(!light) -->
+                </form>
+                <!-- endRemoveIf(!light) -->
 
+                <form id="form-admin" class="pure-form form-settings">
                     <div class="panel" id="panel-admin">
 
                         <div class="header">
@@ -512,23 +651,23 @@
 
                                 <div class="pure-g">
                                     <label class="pure-u-1 pure-u-lg-1-4">Settings</label>
-                                    <div class="pure-u-1-3 pure-u-lg-1-4"><button class="pure-button button-settings-backup pure-u-23-24">Backup</button></div>
-                                    <div class="pure-u-1-3 pure-u-lg-1-4"><button class="pure-button button-settings-restore pure-u-23-24">Restore</button></div>
-                                    <div class="pure-u-1-3 pure-u-lg-1-4"><button class="pure-button button-settings-factory pure-u-1">Factory Reset</button></div>
+                                    <div class="pure-u-1-3 pure-u-lg-1-4"><button type="button" class="pure-button button-settings-backup pure-u-23-24">Backup</button></div>
+                                    <div class="pure-u-1-3 pure-u-lg-1-4"><button type="button" class="pure-button button-settings-restore pure-u-23-24">Restore</button></div>
+                                    <div class="pure-u-1-3 pure-u-lg-1-4"><button type="button" class="pure-button button-settings-factory pure-u-1">Factory Reset</button></div>
                                 </div>
 
                                 <div class="pure-g">
                                     <label class="pure-u-1 pure-u-lg-1-4">Admin password</label>
-                                    <input name="adminPass" class="pure-u-1 pure-u-lg-3-4" type="password" action="reboot" tabindex="11" autocomplete="false" />
+                                    <input name="adminPass1" class="pure-u-1 pure-u-lg-3-4" placeholder="New password" data-settings-real-name="adminPass" minlength="8" maxlength="63" type="password" action="reboot" tabindex="11" autocomplete="false" spellcheck="false" />
+                                    <span class="no-select password-reveal"></span>
+                                    <div class="pure-u-1 pure-u-lg-1-4"></div>
+                                    <input name="adminPass2" class="pure-u-1 pure-u-lg-3-4" placeholder="Repeat password" data-settings-real-name="adminPass" minlength="8" maxlength="63" type="password" action="reboot" tabindex="12" autocomplete="false" spellcheck="false" />
+                                    <span class="no-select password-reveal"></span>
+
                                     <div class="pure-u-0 pure-u-lg-1-4"></div>
                                     <div class="pure-u-1 pure-u-lg-3-4 hint">
                                         The administrator password is used to access this web interface (user 'admin'), but also to connect to the device when in AP mode or to flash a new firmware over-the-air (OTA).<br />
-                                        It must have at least <strong>five characters</strong> (numbers and letters and any of these special characters: _,.;:~!?@#$%^&amp;*&lt;&gt;\|(){}[]) and at least <strong>one lowercase</strong> and <strong>one uppercase</strong> or <strong>one number</strong>.</div>
-                                </div>
-
-                                <div class="pure-g">
-                                    <label class="pure-u-1 pure-u-lg-1-4">Repeat password</label>
-                                    <input name="adminPass" class="pure-u-1 pure-u-lg-3-4" type="password" action="reboot" tabindex="12" autocomplete="false" />
+                                        It must be <strong>8..63 characters</strong> (numbers and letters and any of these special characters: _,.;:~!?@#$%^&amp;*&lt;&gt;\|(){}[]) and have at least <strong>one lowercase</strong> and <strong>one uppercase</strong> or <strong>one number</strong>.</div>
                                 </div>
 
                                 <div class="pure-g">
@@ -547,12 +686,23 @@
                                     <div class="pure-u-1 pure-u-lg-1-4"><input type="checkbox" name="wsAuth" /></div>
                                 </div>
 
-                                <div class="pure-g">
+                                <div class="pure-g module module-api">
                                     <label class="pure-u-1 pure-u-lg-1-4">Enable HTTP API</label>
                                     <div class="pure-u-1 pure-u-lg-1-4"><input type="checkbox" name="apiEnabled" /></div>
                                 </div>
 
-                                <div class="pure-g">
+                                <div class="pure-g module module-api">
+                                    <label class="pure-u-1 pure-u-lg-1-4">Restful API</label>
+                                    <div class="pure-u-1 pure-u-lg-1-4"><input type="checkbox" name="apiRestFul" /></div>
+                                    <div class="pure-u-0 pure-u-lg-1-2"></div>
+                                    <div class="pure-u-0 pure-u-lg-1-4"></div>
+                                    <div class="pure-u-1 pure-u-lg-3-4 hint">
+                                        If enabled, API requests to change a status (like a relay) must be done using PUT.
+                                        If disabled you can issue them as GET requests (easier from a browser).
+                                    </div>
+                                </div>
+
+                                <div class="pure-g module module-api">
                                     <label class="pure-u-1 pure-u-lg-1-4">Real time API</label>
                                     <div class="pure-u-1 pure-u-lg-1-4"><input type="checkbox" name="apiRealTime" /></div>
                                     <div class="pure-u-0 pure-u-lg-1-2"></div>
@@ -563,10 +713,10 @@
                                     </div>
                                 </div>
 
-                                <div class="pure-g">
+                                <div class="pure-g module module-api">
                                     <label class="pure-u-1 pure-u-lg-1-4">HTTP API Key</label>
                                     <input name="apiKey" class="pure-u-3-4 pure-u-lg-1-2" type="text" tabindex="14" />
-                                    <div class=" pure-u-1-4 pure-u-lg-1-4"><button class="pure-button button-apikey pure-u-23-24">Auto</button></div>
+                                    <div class="pure-u-1-4 pure-u-lg-1-4"><button type="button" class="pure-button button-apikey pure-u-23-24">Auto</button></div>
                                     <div class="pure-u-0 pure-u-lg-1-4"></div>
                                     <div class="pure-u-1 pure-u-lg-3-4 hint">
                                         This is the key you will have to pass with every HTTP request to the API, either to get or write values.
@@ -583,35 +733,56 @@
                                     <div class="pure-u-1 pure-u-lg-3-4 hint">Turn ON to be able to telnet to your device while connected to your home router.<br />TELNET is always enabled in AP mode.</div>
                                 </div>
 
-
-                                <div class="pure-g module module-nofuss">
-                                    <label class="pure-u-1 pure-u-lg-1-4">Automatic remote updates (NoFUSS)</label>
-                                    <div class="pure-u-1 pure-u-lg-1-4"><input type="checkbox" name="nofussEnabled" /></div>
-                                </div>
-
-                                <div class="pure-g module module-nofuss">
-                                    <label class="pure-u-1 pure-u-lg-1-4">NoFUSS server</label>
-                                    <input name="nofussServer" class="pure-u-1 pure-u-lg-3-4" type="text" tabindex="15" />
+                                <div class="pure-g module module-telnet">
+                                    <label class="pure-u-1 pure-u-lg-1-4">TELNET Password</label>
+                                    <div class="pure-u-1 pure-u-lg-1-4"><input type="checkbox" name="telnetAuth" /></div>
+                                    <div class="pure-u-0 pure-u-lg-1-2"></div>
                                     <div class="pure-u-0 pure-u-lg-1-4"></div>
-                                    <div class="pure-u-1 pure-u-lg-3-4 hint">This name address of the NoFUSS server for automatic remote updates (see https://bitbucket.org/xoseperez/nofuss).</div>
+                                    <div class="pure-u-1 pure-u-lg-3-4 hint">Request password when starting telnet session</div>
                                 </div>
 
                                 <div class="pure-g">
+                                    <label class="pure-u-1 pure-u-lg-1-4">Heartbeat message</label>
+                                    <select class="pure-u-1 pure-u-lg-3-4" name="hbMode" tabindex="15" >
+                                        <option value="0">Disabled</option>
+                                        <option value="1">On device startup</option>
+                                        <option value="2">Repeat after defined interval</option>
+                                        <option value="3">Repeat only device status</option>
+                                    </select>
+                                    <div class="pure-u-0 pure-u-lg-1-4"></div>
+                                    <div class="pure-u-1 pure-u-lg-3-4 hint">
+                                        Define when heartbeat message will be sent.
+                                    </div>
+                                </div>
+
+                                <div class="pure-g">
+                                    <label class="pure-u-1 pure-u-lg-1-4">Heartbeat interval</label>
+                                    <input name="hbInterval" class="pure-u-1 pure-u-lg-1-4" type="number" tabindex="16" />
+                                    <div class="pure-u-0 pure-u-lg-1-2"></div>
+                                    <div class="pure-u-0 pure-u-lg-1-4"></div>
+                                    <div class="pure-u-1 pure-u-lg-3-4 hint">
+                                        This is the interval in <strong>seconds</strong> how often to send the heartbeat message.
+                                    </div>
+                                </div>
+
+                                <div class="pure-g module module-ota">
                                     <label class="pure-u-1 pure-u-lg-1-4">Upgrade</label>
                                     <input class="pure-u-1-2 pure-u-lg-1-2" name="filename" type="text" readonly />
-                                    <div class=" pure-u-1-4 pure-u-lg-1-8"><button class="pure-button button-upgrade-browse pure-u-23-24">Browse</button></div>
-                                    <div class=" pure-u-1-4 pure-u-lg-1-8"><button class="pure-button button-upgrade pure-u-23-24">Upgrade</button></div>
+                                    <div class="pure-u-1-4 pure-u-lg-1-8"><button type="button" class="pure-button button-upgrade-browse pure-u-23-24">Browse</button></div>
+                                    <div class="pure-u-1-4 pure-u-lg-1-8"><button type="button" class="pure-button button-upgrade pure-u-23-24">Upgrade</button></div>
                                     <div class="pure-u-0 pure-u-lg-1-4"></div>
-                                    <div class="pure-u-1 pure-u-lg-3-4 hint">The device has <span name="free_size"></span> bytes available for OTA updates. If your image is larger than this consider doing a <a href="https://github.com/xoseperez/espurna/wiki/TwoStepUpdates" target="_blank"><strong>two-step update</strong></a>.</div>
+                                    <div class="pure-u-1 pure-u-lg-3-4 hint">The device has <span name="free_size"></span> bytes available for OTA updates. If your image is larger than this consider doing a <a href="https://github.com/xoseperez/espurna/wiki/TwoStepUpdates" rel="noopener" target="_blank"><strong>two-step update</strong></a>.</div>
                                     <div class="pure-u-0 pure-u-lg-1-4"></div>
                                     <div class="pure-u-1 pure-u-lg-3-4"><progress id="upgrade-progress"></progress></div>
-                                    <input name="upgrade" type="file" tabindex="16" />
+                                    <input name="upgrade" type="file" tabindex="17" />
                                 </div>
 
                             </fieldset>
                         </div>
                     </div>
+                </form>
 
+                <form id="form-wifi" class="pure-form form-settings">
                     <div class="panel" id="panel-wifi">
 
                         <div class="header">
@@ -626,6 +797,11 @@
                                 <legend>General</legend>
 
                                 <div class="pure-g">
+                                    <div class="pure-u-1 pure-u-lg-1-4"></div>
+                                    <div class="pure-u-1 pure-u-lg-3-4 hint">Device hostname can be configured on the GENERAL tab.</div>
+                                </div>
+
+                                <div class="pure-g">
                                     <label class="pure-u-1 pure-u-lg-1-4">Scan networks</label>
                                     <div class="pure-u-1 pure-u-lg-1-4"><input type="checkbox" name="wifiScan" tabindex="1" /></div>
                                     <div class="pure-u-0 pure-u-lg-1-2"></div>
@@ -634,7 +810,6 @@
                                         ESPurna will scan for visible WiFi SSIDs and try to connect to networks defined below in order of <strong>signal strength</strong>, even if multiple AP share the same SSID.
                                         When disabled, ESPurna will try to connect to the networks in the same order they are listed below.
                                         Disable this option if you are <strong>connecting to a single access point</strong> (or router) or to a <strong>hidden SSID</strong>.
-                                        </thead>
                                     </div>
                                     <div class="pure-u-0 pure-u-lg-1-4"></div>
                                     <button class="pure-button button-wifi-scan" type="button">Scan now</button>
@@ -647,14 +822,16 @@
 
                                 <legend>Networks</legend>
 
-                                <div id="networks"></div>
+                                <div id="networks" class="group-settings" data-settings-target="ssid pass" ></div>
 
                                 <button type="button" class="pure-button button-add-network">Add network</button>
 
                             </fieldset>
                         </div>
                     </div>
+                </form>
 
+                <form id="form-schedule" class="pure-form form-settings">
                     <div class="panel" id="panel-schedule">
 
                         <div class="header">
@@ -666,20 +843,25 @@
 
                             <fieldset>
 
-                                <div id="schedules"></div>
+                                <div id="schedules" class="group-settings" data-settings-max="10" data-settings-target="schSwitch schType" ></div>
 
                                 <button type="button" class="pure-button button-add-switch-schedule module module-relay">Add switch schedule</button>
                                 <!-- removeIf(!light) -->
                                 <button type="button" class="pure-button button-add-light-schedule module module-color">Add channel schedule</button>
                                 <!-- endRemoveIf(!light) -->
+                                <!-- removeIf(!curtain) -->
+                                <button type="button" class="pure-button button-add-curtain-schedule module module-curtain">Add curtain schedule</button>
+                                <!-- endRemoveIf(!curtain) -->
 
                             </fieldset>
 
                         </div>
 
                     </div>
+                </form>
 
-                    <!-- removeIf(!rfm69) -->
+                <!-- removeIf(!rfm69) -->
+                <form id="form-mapping" class="pure-form form-settings">
                     <div class="panel" id="panel-mapping">
 
                         <div class="header">
@@ -702,16 +884,18 @@
 
                                 <legend>Specific topics</legend>
 
-                                <div id="mapping"></div>
+                                <div id="mapping" class="group-settings" ></div>
 
                                 <button type="button" class="pure-button button-add-mapping">Add</button>
 
                             </fieldset>
                         </div>
+
                     </div>
+                </form>
 
+                <form id="form-messages" class="pure-form">
                     <div class="panel" id="panel-messages">
-
                         <div class="header">
                             <h1>MESSAGES</h1>
                             <h2>
@@ -743,15 +927,17 @@
                                 </tbody>
                             </table>
 
-                            <button class="pure-button button-clear-filters">Clear filters</button>
-                            <button class="pure-button button-clear-messages">Clear messages</button>
-                            <button class="pure-button button-clear-counts">Clear counts</button>
+                            <button type="button" class="pure-button button-clear-filters">Clear filters</button>
+                            <button type="button" class="pure-button button-clear-messages">Clear messages</button>
+                            <button type="button" class="pure-button button-clear-counts">Clear counts</button>
 
 
                         </div>
                     </div>
-                    <!-- endRemoveIf(!rfm69) -->
+                </form>
+                <!-- endRemoveIf(!rfm69) -->
 
+                <form id="form-mqtt" class="pure-form form-settings">
                     <div class="panel" id="panel-mqtt">
 
                         <div class="header">
@@ -780,12 +966,18 @@
 
                                 <div class="pure-g">
                                     <label class="pure-u-1 pure-u-lg-1-4">MQTT User</label>
-                                    <input class="pure-u-1 pure-u-lg-1-4" name="mqttUser" type="text" tabindex="23" placeholder="Leave blank if no user" autocomplete="false" />
+                                    <input class="pure-u-1 pure-u-lg-1-4" name="mqttUser" type="text" tabindex="23" placeholder="Leave blank if no user" autocomplete="off" />
+                                    <div class="pure-u-0 pure-u-lg-1-2"></div>
+                                    <div class="pure-u-0 pure-u-lg-1-4"></div>
+                                    <div class="pure-u-1 pure-u-lg-3-4 hint">
+                                        You can use the following placeholders: {hostname}, {mac}
+                                    </div>
                                 </div>
 
                                 <div class="pure-g">
                                     <label class="pure-u-1 pure-u-lg-1-4">MQTT Password</label>
-                                    <input class="pure-u-1 pure-u-lg-1-4" name="mqttPassword" type="password" tabindex="24" placeholder="Leave blank if no pass" autocomplete="false" />
+                                    <input class="pure-u-1 pure-u-lg-1-4" name="mqttPassword" type="password" tabindex="24" placeholder="Leave blank if no pass" autocomplete="new-password" spellcheck="false" />
+                                    <span class="no-select password-reveal"></span>
                                 </div>
 
                                 <div class="pure-g">
@@ -794,7 +986,7 @@
                                     <div class="pure-u-0 pure-u-lg-1-2"></div>
                                     <div class="pure-u-0 pure-u-lg-1-4"></div>
                                     <div class="pure-u-1 pure-u-lg-3-4 hint">
-                                        If left empty the firmware will generate a client ID based on the serial number of the chip.
+                                        If left empty the firmware will generate a client ID based on the serial number of the chip. You can use the following placeholders: {hostname}, {mac}
                                     </div>
                                 </div>
 
@@ -828,7 +1020,7 @@
                                     <div class="pure-u-0 pure-u-lg-1-4"></div>
                                     <div class="pure-u-1 pure-u-lg-3-4 hint">
                                         This is the fingerprint for the SSL certificate of the server.<br />
-                                        You can get it using <a href="https://www.grc.com/fingerprints.htm" target="_blank">https://www.grc.com/fingerprints.htm</a><br />
+                                        You can get it using <a href="https://www.grc.com/fingerprints.htm" rel="noopener" target="_blank">https://www.grc.com/fingerprints.htm</a><br />
                                         or using openssl from a linux box by typing:<br />
                                         <pre>$ openssl s_client -connect &lt;host&gt;:&lt;port&gt; &lt; /dev/null 2&gt;/dev/null | openssl x509 -fingerprint -noout -in /dev/stdin</pre>
                                     </div>
@@ -841,6 +1033,9 @@
                                     <div class="pure-u-1 pure-u-lg-3-4 hint">
                                         This is the root topic for this device. The {hostname} and {mac} placeholders will be replaced by the device hostname and MAC address.<br />
                                         - <strong>&lt;root&gt;/relay/#/set</strong> Send a 0 or a 1 as a payload to this topic to switch it on or off. You can also send a 2 to toggle its current state. Replace # with the switch ID (starting from 0). If the board has only one switch it will be 0.<br />
+                                        <!-- removeIf(!curtain) -->
+                                        - <strong>&lt;root&gt;/curtain/set</strong> Set the curtain opening value (0-100), 0 means closed, 100 opened. "on", "off", "pause" pilots buttons.<br />
+                                        <!-- endRemoveIf(!curtain) -->
                                         <!-- removeIf(!light) -->
                                         <span class="module module-color">- <strong>&lt;root&gt;/rgb/set</strong> Set the color using this topic, your can either send an "#RRGGBB" value or "RRR,GGG,BBB" (0-255 each).<br /></span>
                                         <span class="module module-color">- <strong>&lt;root&gt;/hsv/set</strong> Set the color using hue (0-360), saturation (0-100) and value (0-100) values, comma separated.<br /></span>
@@ -855,7 +1050,8 @@
 
                                 <div class="pure-g">
                                     <label class="pure-u-1 pure-u-lg-1-4">Use JSON payload</label>
-                                    <div class="pure-u-1 pure-u-lg-3-4"><input type="checkbox" name="mqttUseJson" tabindex="32" /></div>
+                                    <div class="pure-u-1 pure-u-lg-1-4"><input type="checkbox" name="mqttUseJson" tabindex="32" /></div>
+                                    <div class="pure-u-1 pure-u-lg-1-2"></div>
                                     <div class="pure-u-1 pure-u-lg-1-4"></div>
                                     <div class="pure-u-1 pure-u-lg-3-4 hint">
                                         All messages (except the device status) will be included in a JSON payload along with the timestamp and hostname
@@ -869,7 +1065,36 @@
                         </div>
 
                     </div>
+                </form>
 
+                <form id="form-nofuss" class="pure-form form-settings">
+                    <div class="panel" id="panel-nofuss">
+
+                        <div class="header">
+                            <h1>NoFUSS</h1>
+                            <h2>Automatically upgrade the firmware (see <a href="https://bitbucket.org/xoseperez/nofuss">xoseperez/nofuss</a> for details)</h2>
+                        </div>
+
+                        <div class="page">
+                            <fieldset>
+                                <div class="pure-g">
+                                    <label class="pure-u-1 pure-u-lg-1-4">Enable</label>
+                                    <div class="pure-u-1 pure-u-lg-1-4"><input type="checkbox" name="nofussEnabled" /></div>
+                                </div>
+
+                                <div class="pure-g">
+                                    <label class="pure-u-1 pure-u-lg-1-4">Server</label>
+                                    <input name="nofussServer" class="pure-u-1 pure-u-lg-3-4" type="text" tabindex="15" />
+                                    <div class="pure-u-0 pure-u-lg-1-4"></div>
+                                    <div class="pure-u-1 pure-u-lg-3-4 hint">Address of the NoFUSS server</div>
+                                </div>
+                            </fieldset>
+                        </div>
+
+                    </div>
+                </form>
+
+                <form id="form-ntp" class="pure-form form-settings">
                     <div class="panel" id="panel-ntp">
 
                         <div class="header">
@@ -891,17 +1116,22 @@
                                     <input class="pure-u-1 pure-u-lg-3-4" name="ntpServer" type="text" tabindex="41" />
                                 </div>
 
-                                <div class="pure-g">
+                                <div class="pure-g module module-ntplwip">
+                                    <label class="pure-u-1 pure-u-lg-1-4">Time Zone</label>
+                                    <input class="pure-u-1 pure-u-lg-3-4" name="ntpTZ" type="text" tabindex="42" />
+                                </div>
+
+                                <div class="pure-g module module-ntplegacy">
                                     <label class="pure-u-1 pure-u-lg-1-4">Time Zone</label>
                                     <select class="pure-u-1 pure-u-lg-1-4" name="ntpOffset" tabindex="42"></select>
                                 </div>
 
-                                <div class="pure-g">
+                                <div class="pure-g module module-ntplegacy">
                                     <label class="pure-u-1 pure-u-lg-1-4">Enable DST</label>
                                     <div class="pure-u-1 pure-u-lg-1-4"><input type="checkbox" name="ntpDST" /></div>
                                 </div>
 
-                                <div class="pure-g">
+                                <div class="pure-g module module-ntplegacy">
                                     <label class="pure-u-1 pure-u-lg-1-4">DST Region</label>
                                     <select class="pure-u-1 pure-u-lg-1-4" name="ntpRegion">
                                         <option value="0">Europe</option>
@@ -913,7 +1143,143 @@
                         </div>
 
                     </div>
+                </form>
 
+                <!-- removeIf(!thermostat) -->
+                <form id="form-thermostat" class="pure-form form-settings">
+                    <div class="panel" id="panel-thermostat">
+
+                        <div class="header">
+                            <h1>THERMOSTAT</h1>
+                            <h2>Thermostat configuration</h2>
+                        </div>
+
+                        <div class="page">
+
+                            <div class="pure-g">
+                                <label class="pure-u-1 pure-u-lg-1-4">Enable Thermostat</label>
+                                <div class="pure-u-1 pure-u-lg-1-4"><input type="checkbox" name="thermostatEnabled" tabindex="30" /></div>
+                            </div>
+
+                            <div class="pure-g">
+                                <label class="pure-u-1 pure-u-lg-1-4">Thermostat Mode</label>
+                                <div class="pure-u-1 pure-u-lg-1-4"><input type="checkbox" name="thermostatMode" tabindex="30" /></div>
+                            </div>
+
+                            <div class="pure-g">
+                                <label class="pure-u-1 pure-u-lg-1-4" for="thermostatOperationMode">Operation mode</label>
+                                <input class="pure-u-1 pure-u-lg-1-4" name="thermostatOperationMode" type="text" readonly />
+                            </div>
+
+                            <fieldset>
+
+                                <legend>Temperature range</legend>
+
+                                <div class="pure-g">
+                                    <label class="pure-u-1 pure-u-lg-1-4">Max (<span class="tmpUnit"></span>)</label>
+                                    <input class="pure-u-1 pure-u-lg-1-4" id="tempRangeMaxInput" name="tempRangeMax" type="number" min="1" max="100" tabindex="32" data="20" onchange="checkTempRangeMax()" />
+                                </div>
+
+                                <div class="pure-g">
+                                    <label class="pure-u-1 pure-u-lg-1-4">Min (<span class="tmpUnit"></span>)</label>
+                                    <input class="pure-u-1 pure-u-lg-1-4" id="tempRangeMinInput" name="tempRangeMin" type="number" min="0" max="99" tabindex="31" data="10" onchange="checkTempRangeMin()" />
+                                </div>
+
+                            </fieldset>
+
+                            <fieldset>
+
+                                <legend>Remote sensor</legend>
+
+                                <div class="pure-g">
+                                    <label class="pure-u-1 pure-u-lg-1-4" for="remoteSensorName">Remote sensor name</label>
+                                    <input class="pure-u-1 pure-u-lg-1-4" name="remoteSensorName" type="text" />
+                                </div>
+
+                                <div class="pure-g">
+                                    <label class="pure-u-1 pure-u-lg-1-4" for="remoteTmp">Remote temperature (<span class="tmpUnit"></span>)</label>
+                                    <input class="pure-u-1 pure-u-lg-1-4" name="remoteTmp" type="text" readonly />
+                                </div>
+
+                                <div class="pure-g">
+                                    <label class="pure-u-1 pure-u-lg-1-4" for="remoteTempMaxWait">Remote temperature waiting (s)</label>
+                                    <input class="pure-u-1 pure-u-lg-1-4" name="remoteTempMaxWait" type="number" min="0" max="1800" tabindex="33" data="120" />
+                                </div>
+
+                            </fieldset>
+
+                            <fieldset>
+
+                                <legend>Operation mode</legend>
+
+                                <div class="pure-g">
+                                    <label class="pure-u-1 pure-u-lg-1-4" for="maxOnTime">Max heating time (m)</label>
+                                    <input class="pure-u-1 pure-u-lg-1-4" name="maxOnTime" type="number" min="0" max="180" tabindex="34" data="30" />
+                                </div>
+
+                                <div class="pure-g">
+                                    <label class="pure-u-1 pure-u-lg-1-4" for="minOffTime">Min rest time (m)</label>
+                                    <input class="pure-u-1 pure-u-lg-1-4" name="minOffTime" type="number" min="0" max="60" tabindex="35" data="10" />
+                                </div>
+
+                            </fieldset>
+
+                            <fieldset>
+
+                                <legend>Autonomous mode</legend>
+
+                                <div class="pure-g">
+                                    <label class="pure-u-1 pure-u-lg-1-4" for="aloneOnTime">Heating time (m)</label>
+                                    <input class="pure-u-1 pure-u-lg-1-4" name="aloneOnTime" type="number" min="0" max="180" tabindex="36" data="5" />
+                                </div>
+
+                                <div class="pure-g">
+                                    <label class="pure-u-1 pure-u-lg-1-4" for="aloneOffTime">Rest time (m)</label>
+                                    <input class="pure-u-1 pure-u-lg-1-4" name="aloneOffTime" type="number" min="0" max="180" tabindex="37" data="55" />
+                                </div>
+
+                            </fieldset>
+
+                            <fieldset>
+
+                                <legend>Time worked</legend>
+
+                                <div class="pure-g">
+                                    <label class="pure-u-1 pure-u-lg-1-4" for="burnToday">Today</label>
+                                    <input class="pure-u-1 pure-u-lg-1-4" type="text" name="burnToday" readonly />
+                                </div>
+
+                                <div class="pure-g">
+                                    <label class="pure-u-1 pure-u-lg-1-4" for="burnYesterday">Yesterday</label>
+                                    <input class="pure-u-1 pure-u-lg-1-4" type="text" name="burnYesterday" readonly />
+                                </div>
+
+                                <div class="pure-g">
+                                    <label class="pure-u-1 pure-u-lg-1-4" for="burnThisMonth">Current month</label>
+                                    <input class="pure-u-1 pure-u-lg-1-4" type="text" name="burnThisMonth" readonly />
+                                </div>
+
+                                <div class="pure-g">
+                                    <label class="pure-u-1 pure-u-lg-1-4" for="burnPrevMonth">Previous month</label>
+                                    <input class="pure-u-1 pure-u-lg-1-4" type="text" name="burnPrevMonth" readonly />
+                                </div>
+
+                                <div class="pure-g">
+                                    <label class="pure-u-1 pure-u-lg-1-4" for="burnTotal">Total</label>
+                                    <input class="pure-u-1 pure-u-lg-1-4" type="text" name="burnTotal" readonly />
+                                </div>
+
+                                <div class="pure-g">
+                                    <button type="button" class="pure-button button-thermostat-reset-counters">Reset counters</button>
+                                </div>
+
+                            </fieldset>
+                        </div>
+                    </div>
+                </form>
+                <!-- endRemoveIf(!thermostat) -->
+
+                <form id="form-domoticz" class="pure-form form-settings">
                     <div class="panel" id="panel-domoticz">
 
                         <div class="header">
@@ -950,17 +1316,19 @@
                                     <div class="pure-u-1 hint">Set IDX to 0 to disable notifications from that component.</div>
                                 </div>
 
-                                <div id="dczRelays"></div>
+                                <div id="dczRelays" class="group-settings" ></div>
 
                                 <!-- removeIf(!sensor) -->
-                                <div id="dczMagnitudes"></div>
+                                <div id="dczMagnitudes" class="group-settings" ></div>
                                 <!-- endRemoveIf(!sensor) -->
 
                             </fieldset>
                         </div>
 
                     </div>
+                </form>
 
+                <form id="form-ha" class="pure-form form-settings">
                     <div class="panel" id="panel-ha">
 
                         <div class="header">
@@ -982,9 +1350,6 @@
                                     <div class="pure-u-0 pure-u-lg-1-4"></div>
                                     <div class="pure-u-1 pure-u-lg-3-4 hint">
                                         Home Assistant auto-discovery feature. Enable and save to add the device to your HA console.
-                                        <!-- removeIf(!light) -->
-                                        When using a colour light you might want to disable CSS style so Home Assistant can parse the color.
-                                        <!-- endRemoveIf(!light) -->
                                     </div>
                                 </div>
 
@@ -997,7 +1362,7 @@
 
                                 <div class="pure-g">
                                     <label class="pure-u-1 pure-u-lg-1-4">Configuration</label>
-                                    <div class="pure-u-1-4 pure-u-lg-3-4"><button class="pure-button button-ha-config pure-u-1-3">Show</button></div>
+                                    <div class="pure-u-1-4 pure-u-lg-3-4"><button type="button" class="pure-button button-ha-config pure-u-1-3">Show</button></div>
                                     <div class="pure-u-0 pure-u-lg-1-4"></div>
                                     <div class="pure-u-1 pure-u-lg-3-4 hint">
                                         These are the settings you should copy to your Home Assistant "configuration.yaml" file.
@@ -1006,7 +1371,7 @@
                                     </div>
                                 </div>
                                 <div class="pure-g">
-                                    <span class="pure-u-1 terminal" id="haConfig" name="haConfig"></span>
+                                    <textarea class="pure-u-1 terminal" id="haConfig" name="haConfig" wrap="off" readonly></textarea>
                                 </div>
 
 
@@ -1014,7 +1379,9 @@
                         </div>
 
                     </div>
+                </form>
 
+                <form id="form-thingspeak" class="pure-form form-settings">
                     <div class="panel" id="panel-thingspeak">
 
                         <div class="header">
@@ -1036,8 +1403,25 @@
                                 </div>
 
                                 <div class="pure-g">
+                                    <label class="pure-u-1 pure-u-lg-1-4">Clear cache</label>
+                                    <div class="pure-u-1 pure-u-lg-1-4"><input type="checkbox" name="tspkClear" tabindex="31" /></div>
+                                    <div class="pure-u-0 pure-u-lg-1-2"></div>
+                                    <div class="pure-u-0 pure-u-lg-1-4"></div>
+                                    <div class="pure-u-1 pure-u-lg-3-4 hint">
+                                        With every POST to thinkspeak.com only enqueued fields are sent.
+                                        If you select to clear the cache after every sending this will result in only those fields that have changed will be posted.
+                                        If you want all fields to be sent with every POST do not clear the cache.
+                                    </div>
+                                </div>
+
+                                <div class="pure-g">
+                                    <label class="pure-u-1 pure-u-lg-1-4">Thingspeak address</label>
+                                    <input class="pure-u-1 pure-u-lg-3-4" name="tspkAddress" type="text" tabindex="32" />
+                                </div>
+
+                                <div class="pure-g">
                                     <label class="pure-u-1 pure-u-lg-1-4">Thingspeak API Key</label>
-                                    <input class="pure-u-1 pure-u-lg-3-4" name="tspkKey" type="text" tabindex="31" />
+                                    <input class="pure-u-1 pure-u-lg-3-4" name="tspkKey" type="text" tabindex="33" />
                                 </div>
 
                                 <legend>Sensors &amp; actuators</legend>
@@ -1046,17 +1430,19 @@
                                     <div class="pure-u-1 hint">Enter the field number to send each data to, 0 disable notifications from that component.</div>
                                 </div>
 
-                                <div id="tspkRelays"></div>
+                                <div id="tspkRelays" class="group-settings" ></div>
 
                                 <!-- removeIf(!sensor) -->
-                                <div id="tspkMagnitudes"></div>
+                                <div id="tspkMagnitudes" class="group-settings" ></div>
                                 <!-- endRemoveIf(!sensor) -->
 
                             </fieldset>
                         </div>
 
                     </div>
+                </form>
 
+                <form id="form-idb" class="pure-form form-settings">
                     <div class="panel" id="panel-idb">
 
                         <div class="header">
@@ -1092,19 +1478,76 @@
 
                                 <div class="pure-g">
                                     <label class="pure-u-1 pure-u-lg-1-4">Username</label>
-                                    <input class="pure-u-1 pure-u-lg-3-4" name="idbUsername" type="text" tabindex="44" autocomplete="false" />
+                                    <input class="pure-u-1 pure-u-lg-3-4" name="idbUsername" type="text" tabindex="44" autocomplete="off" />
                                 </div>
 
                                 <div class="pure-g">
                                     <label class="pure-u-1 pure-u-lg-1-4">Password</label>
-                                    <input class="pure-u-1 pure-u-lg-3-4" name="idbPassword" type="password" tabindex="45" autocomplete="false" />
+                                    <input class="pure-u-1 pure-u-lg-3-4" name="idbPassword" type="password" tabindex="45" autocomplete="new-password" spellcheck="false" />
+                                    <span class="no-select password-reveal"></span>
                                 </div>
 
                             </fieldset>
                         </div>
 
                     </div>
+                </form>
 
+                <form id="form-rpn" class="pure-form form-settings">
+                    <div class="panel" id="panel-rpn">
+
+                        <div class="header">
+                            <h1>RULES</h1>
+                            <h2>
+                                Here you can configure advanced rules based on RPN expressions. Check the <a href="https://github.com/xoseperez/espurna/wiki/RPN-Rules" rel="noopener" target="_blank">wiki page about the RPN Rules module</a> to know how to use them.
+                            </h2>
+                        </div>
+
+                        <div class="page">
+
+                            <fieldset>
+
+                                <legend>Configuration</legend>
+
+                                <div class="pure-g">
+                                    <label class="pure-u-1 pure-u-lg-1-4">Sticky variables</label>
+                                    <div class="pure-u-1 pure-u-lg-1-4"><input type="checkbox" name="rpnSticky" tabindex="100" /></div>
+                                    <div class="pure-u-0 pure-u-lg-1-2"></div>
+                                    <div class="pure-u-0 pure-u-lg-1-4"></div>
+                                    <div class="pure-u-1 pure-u-lg-3-4 hint">
+                                        Sticky variables are persistent, once defined the first time they will be always available until next reboot (they do not persist across reboots).
+                                        Non sticky variables are only available during the next rule execution, just after being defined, and then removed. This applies to status, sensor and MQTT variables equally.
+                                        Mind that calling a non-existing variable from a rule will make it silently fail.
+                                    </div>
+                                </div>
+
+                                <div class="pure-g">
+                                    <label class="pure-u-1 pure-u-lg-1-4" for="rpnDelay">Execution delay (ms)</label>
+                                    <input class="pure-u-1 pure-u-lg-1-4" name="rpnDelay" type="number" min="100" tabindex="101" />
+                                </div>
+
+                                <legend>Rules</legend>
+
+                                <div id="rpnRules" class="group-settings" data-settings-target="rpnRule" ></div>
+                                <button type="button" class="pure-button button-add-rpnrule">Add</button>
+
+                                <legend>MQTT</legend>
+
+                                <div class="pure-g">
+                                    <div class="pure-u-1-2">MQTT Topic</div>
+                                    <div class="pure-u-1-3">Variable Name</div>
+                                </div>
+
+                                <div id="rpnTopics" class="group-settings" data-settings-target="rpnTopic" ></div>
+                                <button type="button" class="pure-button button-add-rpntopic">Add</button>
+
+                            </fieldset>
+                        </div>
+
+                    </div>
+                </form>
+
+                <form id="form-dbg" class="pure-form">
                     <div class="panel" id="panel-dbg">
 
                         <div class="header">
@@ -1121,14 +1564,17 @@
                                 <div class="pure-g module module-cmd">
                                     <div class="pure-u-1 hint">
                                         Write a command and click send to execute it on the device. The output will be shown in the debug text area below.
+                                        <!-- removeIf(!curtain) -->
+                                        Type "debug" to display MCU serial exchanges. Any other command is sent to MCU serial as is.
+                                        <!-- endRemoveIf(!curtain) -->
                                     </div>
                                     <input name="dbgcmd" class="pure-u-3-4" type="text" tabindex="2" />
-                                    <div class=" pure-u-1-4 pure-u-lg-1-4"><button class="pure-button button-dbgcmd pure-u-23-24">Send</button></div>
+                                    <div class="pure-u-1-4 pure-u-lg-1-4"><button type="button" class="pure-button button-dbgcmd pure-u-23-24">Send</button></div>
                                 </div>
 
                                 <div class="pure-g">
                                     <textarea class="pure-u-1 terminal" id="weblog" name="weblog" wrap="off" readonly></textarea>
-                                    <div class=" pure-u-1-4 pure-u-lg-1-4"><button class="pure-button button-dbg-clear pure-u-23-24">Clear</button></div>
+                                    <div class="pure-u-1-4 pure-u-lg-1-4"><button type="button" class="pure-button button-dbg-clear pure-u-23-24">Clear</button></div>
                                 </div>
 
                             </fieldset>
@@ -1136,9 +1582,11 @@
                         </div>
 
                     </div>
+                </form>
 
-                    <!-- removeIf(!sensor) -->
-                    <div class="panel" id="panel-sensors">
+                <!-- removeIf(!sensor) -->
+                <form id="form-sns" class="pure-form form-settings">
+                    <div class="panel" id="panel-sns">
 
                         <div class="header">
                             <h1>SENSOR CONFIGURATION</h1>
@@ -1156,23 +1604,30 @@
                                 <div class="pure-g">
                                     <label class="pure-u-1 pure-u-lg-1-4">Read interval</label>
                                     <select class="pure-u-1 pure-u-lg-1-4" name="snsRead">
+                                        <option value="1">1 second</option>
                                         <option value="6">6 seconds</option>
                                         <option value="10">10 seconds</option>
                                         <option value="15">15 seconds</option>
                                         <option value="30">30 seconds</option>
                                         <option value="60">1 minute</option>
                                         <option value="300">5 minutes</option>
+                                        <option value="600">10 minutes</option>
+                                        <option value="900">15 minutes</option>
+                                        <option value="1800">30 minutes</option>
+                                        <option value="3600">60 minutes</option>
                                     </select>
                                     <div class="pure-u-0 pure-u-lg-1-2"></div>
                                     <div class="pure-u-0 pure-u-lg-1-4"></div>
                                     <div class="pure-u-1 pure-u-lg-3-4 hint">
-                                        Select the interval between readings. These will be filtered and averaged for the report. The default and recommended value is 6 seconds.
+                                        Select the interval between readings. These will be filtered and averaged for the report.
+                                        Please mind some sensors do not have fast refresh intervals. Check the sensor datasheet to know the minimum read interval.
+                                        The default and recommended value is 6 seconds.
                                     </div>
                                 </div>
 
                                 <div class="pure-g">
                                     <label class="pure-u-1 pure-u-lg-1-4">Report every</label>
-                                    <div class="pure-u-1 pure-u-lg-1-4"><input name="snsReport" class="pure-u-1" type="number" min="1" step="1" max="12" /></div>
+                                    <div class="pure-u-1 pure-u-lg-1-4"><input name="snsReport" class="pure-u-1" type="number" min="1" step="1" max="60" /></div>
                                     <div class="pure-u-0 pure-u-lg-1-2"></div>
                                     <div class="pure-u-0 pure-u-lg-1-4"></div>
                                     <div class="pure-u-1 pure-u-lg-3-4 hint">
@@ -1181,47 +1636,48 @@
                                 </div>
 
                                 <div class="pure-g module module-pwr">
+                                    <label class="pure-u-1 pure-u-lg-1-4">Save every</label>
+                                    <div class="pure-u-1 pure-u-lg-1-4"><input name="snsSave" class="pure-u-1" type="number" min="0" step="1" max="200" /></div>
+                                    <div class="pure-u-0 pure-u-lg-1-2"></div>
+                                    <div class="pure-u-0 pure-u-lg-1-4"></div>
+                                    <div class="pure-u-1 pure-u-lg-3-4 hint">
+                                        Save aggregated data to EEPROM after these many reports. At the moment this only applies to total energy readings.
+                                        Please mind: saving data to EEPROM too often will wear out the flash memory quickly.
+                                        Set it to 0 to disable this feature (default value).
+                                    </div>
+                                </div>
+
+                                <div class="pure-g module module-pwr">
                                     <label class="pure-u-1 pure-u-lg-1-4">Power units</label>
                                     <select name="pwrUnits" tabindex="16" class="pure-u-1 pure-u-lg-1-4">
-                                        <option value="0">Watts (W)</option>
-                                        <option value="1">Kilowatts (kW)</option>
+                                        <option value="13">Watts (W)</option>
+                                        <option value="14">Kilowatts (kW)</option>
                                     </select>
                                 </div>
 
-                                <div class="pure-g module module-hlw module-cse module-emon module-pzem">
+                                <div class="pure-g module module-pwr">
                                     <label class="pure-u-1 pure-u-lg-1-4">Energy units</label>
-                                    <select name="energyUnits" tabindex="16" class="pure-u-1 pure-u-lg-1-4">
-                                        <option value="0">Joules (J)</option>
-                                        <option value="1">Kilowatts·hour (kWh)</option>
+                                    <select name="eneUnits" tabindex="16" class="pure-u-1 pure-u-lg-1-4">
+                                        <option value="15">Joules (J)</option>
+                                        <option value="16">Kilowatts·hour (kWh)</option>
                                     </select>
                                 </div>
 
-                                <div class="pure-g module module-temperature">
+                                <div class="pure-g module module-tmp">
                                     <label class="pure-u-1 pure-u-lg-1-4">Temperature units</label>
                                     <select name="tmpUnits" tabindex="16" class="pure-u-1 pure-u-lg-1-4">
-                                        <option value="0">Celsius (&deg;C)</option>
-                                        <option value="1">Fahrenheit (&deg;F)</option>
+                                        <option value="2">Celsius (&deg;C)</option>
+                                        <option value="3">Fahrenheit (&deg;F)</option>
+                                        <option value="4">Kelvin (K)</option>
                                     </select>
                                 </div>
 
-                                <div class="pure-g module module-temperature">
-                                    <label class="pure-u-1 pure-u-lg-1-4">Temperature correction</label>
-                                    <input name="tmpCorrection" class="pure-u-1 pure-u-lg-1-4" type="number" action="reboot" min="-100" step="0.1" max="100" tabindex="18" />
+                                <div class="pure-g module module-mics">
+                                    <label class="pure-u-1 pure-u-lg-1-4">Calibrate gas sensor</label>
+                                    <div class="pure-u-1 pure-u-lg-1-4"><input type="checkbox" name="snsResetCalibration" tabindex="55" /></div>
                                     <div class="pure-u-0 pure-u-lg-1-2"></div>
                                     <div class="pure-u-0 pure-u-lg-1-4"></div>
-                                    <div class="pure-u-1 pure-u-lg-3-4 hint">
-                                        Temperature correction value is added to the measured value which may be inaccurate due to many factors. The value can be negative.
-                                    </div>
-                                </div>
-
-                                <div class="pure-g module module-humidity">
-                                    <label class="pure-u-1 pure-u-lg-1-4">Humidity correction</label>
-                                    <input name="humCorrection" class="pure-u-1 pure-u-lg-1-4" type="number" action="reboot" min="-100" step="0.1" max="100" tabindex="18" />
-                                    <div class="pure-u-0 pure-u-lg-1-2"></div>
-                                    <div class="pure-u-0 pure-u-lg-1-4"></div>
-                                    <div class="pure-u-1 pure-u-lg-3-4 hint">
-                                        Humidity correction value is added to the measured value which may be inaccurate due to many factors. The value can be negative.
-                                    </div>
+                                    <div class="pure-u-1 pure-u-lg-3-4 hint">Move this switch to ON and press "Save" to reset gas sensor calibration. Check the sensor datasheet for calibration conditions.</div>
                                 </div>
 
                                 <legend class="module module-hlw module-cse module-emon">Energy monitor</legend>
@@ -1251,32 +1707,50 @@
                                     <label class="pure-u-1 pure-u-lg-1-4">Expected Power</label>
                                     <input class="pure-u-1 pure-u-lg-3-4 pwrExpected" name="pwrExpectedP" type="text" tabindex="54" placeholder="0" />
                                     <div class="pure-u-0 pure-u-lg-1-4"></div>
-                                    <div class="pure-u-1 pure-u-lg-3-4 hint">In Watts (W). Calibrate your sensor connecting a pure resistive load (like a bulb) and enter here the its nominal power or use a multimeter.</div>
+                                    <div class="pure-u-1 pure-u-lg-3-4 hint">In Watts (W). Calibrate your sensor connecting a pure resistive load (like a bulb) and enter here its nominal power or use a multimeter.</div>
+                                </div>
+
+                                <div class="pure-g module module-pm">
+                                    <label class="pure-u-1 pure-u-lg-1-4">Energy Ratio</label>
+                                    <input class="pure-u-1 pure-u-lg-3-4" name="pwrRatioE" type="text" tabindex="55" placeholder="0" />
+                                    <div class="pure-u-0 pure-u-lg-1-4"></div>
+                                    <div class="pure-u-1 pure-u-lg-3-4 hint">Energy ratio in pulses/kWh.</div>
                                 </div>
 
                                 <div class="pure-g module module-hlw module-cse module-emon">
                                     <label class="pure-u-1 pure-u-lg-1-4">Reset calibration</label>
-                                    <div class="pure-u-1 pure-u-lg-1-4"><input type="checkbox" name="pwrResetCalibration" tabindex="55" /></div>
+                                    <div class="pure-u-1 pure-u-lg-1-4"><input type="checkbox" name="pwrResetCalibration" tabindex="56" /></div>
                                     <div class="pure-u-0 pure-u-lg-1-2"></div>
                                     <div class="pure-u-0 pure-u-lg-1-4"></div>
                                     <div class="pure-u-1 pure-u-lg-3-4 hint">Move this switch to ON and press "Save" to revert to factory calibration values.</div>
                                 </div>
 
-                                <div class="pure-g module module-hlw module-cse module-emon">
+                                <div class="pure-g module module-hlw module-cse module-emon module-pm">
                                     <label class="pure-u-1 pure-u-lg-1-4">Reset energy</label>
-                                    <div class="pure-u-1 pure-u-lg-1-4"><input type="checkbox" name="pwrResetE" tabindex="56" /></div>
+                                    <div class="pure-u-1 pure-u-lg-1-4"><input type="checkbox" name="pwrResetE" tabindex="57" /></div>
                                     <div class="pure-u-0 pure-u-lg-1-2"></div>
                                     <div class="pure-u-0 pure-u-lg-1-4"></div>
                                     <div class="pure-u-1 pure-u-lg-3-4 hint">Move this switch to ON and press "Save" to set energy count to 0.</div>
+                                </div>
+
+                                <div class="pure-g module module-magnitude-corrections">
+                                    <legend>Value corrections</legend>
+                                    <div class="pure-u-1 pure-u-lg-3-4 hint more">
+                                        Correction value is added to the measured value which may be inaccurate due to many factors. The value can be negative.
+                                    </div>
+                                    <div class="pure-form pure-form-aligned" id="magnitude-corrections">
+                                    </div>
                                 </div>
 
                             </fieldset>
                         </div>
 
                     </div>
-                    <!-- endRemoveIf(!sensor) -->
+                </form>
+                <!-- endRemoveIf(!sensor) -->
 
-                    <!-- removeIf(!rfbridge) -->
+                <!-- removeIf(!rfbridge) -->
+                <form id="form-rfb" class="pure-form form-settings">
                     <div class="panel" id="panel-rfb">
 
                         <div class="header">
@@ -1287,25 +1761,120 @@
                                 To learn a new code click <strong>LEARN</strong> (the Sonoff RFBridge will beep) then press a button on the remote, the new code should show up (and the RFBridge will double beep). If the device double beeps but the code does not update it has not been properly learnt. Keep trying.<br /><br />
                                 Modify or create new codes manually and then click <strong>SAVE</strong> to store them in the device memory. If your controlled device uses the same code to switch ON and OFF, learn the code with the ON button and copy paste it to the OFF input box, then click SAVE on the last one to store the value.<br /><br />
                                 Delete any code clicking the <strong>FORGET</strong> button.
-                                <span class="module module-rfbraw"><br /><br />You can also specify 116-chars long RAW codes. Raw codes require a <a target="_blank" href="https://github.com/rhx/RF-Bridge-EFM8BB1">specific firmware for for the EFM8BB1</a>.</span>
+                                <br /><br />You can also specify any RAW code. For reference see <a rel="noopener" target="_blank" href="https://github.com/Portisch/RF-Bridge-EFM8BB1/wiki/Commands">possible commands for Sonoff RF Bridge EFM8BB1</a> (original firmware supports codes from <strong>0xA0</strong> to <strong>0xA5</strong>).
                             </h2>
                         </div>
 
                         <div class="page">
                             <fieldset>
+                                <legend>RF Codes</legend>
+
                                 <div id="rfbNodes"></div>
+
+                                <legend>Settings</legend>
+
+                                <div class="pure-g">
+                                    <label class="pure-u-1 pure-u-lg-1-4">Repeats</label>
+                                    <div class="pure-u-1 pure-u-lg-1-4"><input class="pure-u-1 pure-u-lg-23-24" name="rfbRepeat" type="number" min="1" tabindex="0" /></div>
+                                    <div class="pure-u-0 pure-u-lg-1-2"></div>
+                                    <div class="pure-u-0 pure-u-lg-1-4"></div>
+                                    <div class="pure-u-1 pure-u-lg-3-4 hint">Number of times to repeat transmission</div>
+                                </div>
+
+                                <div class="pure-g module module-rfbdirect">
+                                    <legend>GPIO</legend>
+
+                                    <div class="pure-u-1 pure-u-lg-1 hint">Pins used by the receiver (RX) and transmitter (TX). Set to <strong>NONE</strong> to disable</div>
+
+                                    <label class="pure-u-1 pure-u-lg-1-4">RX Pin</label>
+                                    <select class="pure-u-1 pure-u-lg-1-4 gpio-select" name="rfbRX"></select>
+                                    <div class="pure-u-0 pure-u-lg-1-2"></div>
+
+                                    <label class="pure-u-1 pure-u-lg-1-4">TX Pin</label>
+                                    <select class="pure-u-1 pure-u-lg-1-4 gpio-select" name="rfbTX"></select>
+                                    <div class="pure-u-0 pure-u-lg-1-2"></div>
+
+                                </div>
                             </fieldset>
                         </div>
-                    </div>
-                    <!-- endRemoveIf(!rfbridge) -->
 
+                    </div>
                 </form>
+                <!-- endRemoveIf(!rfbridge) -->
+
+                <!-- removeIf(!lightfox) -->
+                <form id="form-lightfox" class="pure-form form-settings">
+                    <div class="panel" id="panel-lightfox">
+
+                        <div class="header">
+                            <h1>LIGHTFOX RF</h1>
+                            <h2>
+                                LightFox RF configuration<br /><br />
+                                This page allows you to control LightFox RF receiver options.<br /><br />
+                                To learn a new code click <strong>LEARN</strong>, wait for 3 seconds then press a button on the remote, one of the relays will toggle. If no device relay toggles the code has not been properly learnt. Keep trying.<br /><br />
+                                Delete all the codes by clicking the <strong>CLEAR</strong> button and wait for 10 seconds.<br /><br />
+                                You can also specify which RF button controls which relay using controls below.
+                            </h2>
+                        </div>
+
+                        <div class="page">
+                            <div class="pure-g">
+                                <label class="pure-u-1 pure-u-lg-1-4">RF Actions</label>
+                                <div class="pure-u-1-2 pure-u-lg-3-8"><button type="button" class="pure-button button-lightfox-learn pure-u-23-24">Learn</button></div>
+                                <div class="pure-u-1-2 pure-u-lg-3-8"><button type="button" class="pure-button button-lightfox-clear pure-u-1">Clear</button></div>
+                            </div>
+
+                            <fieldset id="lightfoxNodes"></fieldset>
+                        </div>
+
+                    </div>
+                </form>
+                <!-- endRemoveIf(!lightfox) -->
 
             </div> <!-- content -->
 
         </div> <!-- layout -->
 
         <!-- Templates -->
+
+        <div id="magnitudeCorrectionTemplate" class="template">
+            <div class="pure-g">
+                <label class="pure-u-1 pure-u-lg-1-4"></label>
+                <input name="correction" class="pure-u-1 pure-u-lg-1-4" type="number" step="0.1" data="0"></input>
+                <div class="pure-u-0 pure-u-lg-1-2"></div>
+                <div class="pure-u-0 pure-u-lg-1-4"></div>
+                <div class="pure-u-1 pure-u-lg-3-4 hint"></div>
+            </div>
+        </div>
+
+        <div id="ledConfigTemplate" class="template">
+            <div class="pure-form pure-form-aligned">
+                <legend class="pure-u-1 pure-u-lg-1-4">LED #<span class="id"></span></legend>
+                <div class="pure-control-group">
+                    <label>GPIO</label>
+                    <select class="pure-input-2-3 gpio-select" name="ledGPIO" action="reboot"></select>
+                </div>
+                <div class="pure-control-group">
+                    <label>Mode</label>
+                    <select class="pure-input-2-3" name="ledMode">
+                        <option value="1">WiFi status</option>
+                        <option value="2">Follow switch #</option>
+                        <option value="3">Inverse switch #</option>
+                        <option value="4">Find me</option>
+                        <option value="5">Find me &amp; WiFi</option>
+                        <option value="8">Switches status</option>
+                        <option value="9">Switches &amp; WiFi</option>
+                        <option value="0">Manual</option>
+                        <option value="6">Always ON</option>
+                        <option value="7">Always OFF</option>
+                    </select>
+                </div>
+                <div class="pure-control-group">
+                    <label>Relay ID</label>
+                    <input class="pure-input-2-3" name="ledRelay" type="number" min="0" data="0"></input>
+                </div>
+            </div>
+        </div>
 
         <!-- removeIf(!rfbridge) -->
         <div id="rfbNodeTemplate" class="template">
@@ -1314,7 +1883,7 @@
 
             <div class="pure-g">
                 <div class="pure-u-1 pure-u-lg-1-4"><label>Switch ON</label></div>
-                <input class="pure-u-1 pure-u-lg-1-3" type="text" maxlength="18" name="rfbcode" data-id="1" data-status="1" />
+                <input class="pure-u-1 pure-u-lg-1-3" type="text" maxlength="116" name="rfbcode" data-status="1" data-settings-ignore="true" />
                 <div class="pure-u-1-3 pure-u-lg-1-8"><button type="button" class="pure-u-23-24 pure-button button-rfb-learn">LEARN</button></div>
                 <div class="pure-u-1-3 pure-u-lg-1-8"><button type="button" class="pure-u-23-24 pure-button button-rfb-send">SAVE</button></div>
                 <div class="pure-u-1-3 pure-u-lg-1-8"><button type="button" class="pure-u-23-24 pure-button button-rfb-forget">FORGET</button></div>
@@ -1322,7 +1891,7 @@
 
             <div class="pure-g">
                 <div class="pure-u-1 pure-u-lg-1-4"><label>Switch OFF</label></div>
-                <input class="pure-u-1 pure-u-lg-1-3" type="text" maxlength="18" name="rfbcode" data-id="1" data-status="0" />
+                <input class="pure-u-1 pure-u-lg-1-3" type="text" maxlength="116" name="rfbcode" data-status="0" data-settings-ignore="true" />
                 <div class="pure-u-1-3 pure-u-lg-1-8"><button type="button" class="pure-u-23-24 pure-button button-rfb-learn">LEARN</button></div>
                 <div class="pure-u-1-3 pure-u-lg-1-8"><button type="button" class="pure-u-23-24 pure-button button-rfb-send">SAVE</button></div>
                 <div class="pure-u-1-3 pure-u-lg-1-8"><button type="button" class="pure-u-23-24 pure-button button-rfb-forget">FORGET</button></div>
@@ -1330,6 +1899,17 @@
 
         </div>
         <!-- endRemoveIf(!rfbridge) -->
+
+        <!-- removeIf(!lightfox) -->
+        <div id="lightfoxNodeTemplate" class="template">
+
+            <div class="pure-g">
+                <label class="pure-u-1 pure-u-lg-1-4">Button #<span></span></label>
+                <select class="pure-u-1 pure-u-lg-3-4" name="btnRelay" action="reboot"></select>
+            </div>
+
+        </div>
+        <!-- endRemoveIf(!lightfox) -->
 
         <div id="networkTemplate" class="template">
 
@@ -1340,12 +1920,13 @@
                 <div class="pure-u-1-6 pure-u-lg-1-12"><button type="button" class="pure-button button-more-network pure-u-1">...</button></div>
 
                 <label class="pure-u-1 pure-u-lg-1-4 more">Password</label>
-                <input class="pure-u-1 pure-u-lg-3-4 more" name="pass" type="password" action="reconnect" value="" tabindex="0" autocomplete="false" />
+                <input class="pure-u-1 pure-u-lg-3-4 more" name="pass" type="password" action="reconnect" value="" tabindex="0" autocomplete="new-password" spellcheck="false" />
+                <span class="no-select password-reveal more"></span>
 
                 <label class="pure-u-1 pure-u-lg-1-4 more">Static IP</label>
                 <input class="pure-u-1 pure-u-lg-3-4 more" name="ip" type="text" action="reconnect" value="" maxlength="15" tabindex="0" autocomplete="false" />
                 <div class="pure-u-0 pure-u-lg-1-4 more"></div>
-                <div class="pure-u-1 pure-u-lg-3-4 hint more">Leave empty for DNS negotiation</div>
+                <div class="pure-u-1 pure-u-lg-3-4 hint more">Leave empty for DHCP negotiation</div>
 
                 <label class="pure-u-1 pure-u-lg-1-4 more">Gateway IP</label>
                 <input class="pure-u-1 pure-u-lg-3-4 more" name="gw" type="text" action="reconnect" value="" maxlength="15" tabindex="0" autocomplete="false" />
@@ -1353,12 +1934,12 @@
                 <div class="pure-u-1 pure-u-lg-3-4 hint more">Set when using a static IP</div>
 
                 <label class="pure-u-1 pure-u-lg-1-4 more">Network Mask</label>
-                <input class="pure-u-1 pure-u-lg-3-4 more" name="mask" type="text" action="reconnect" value="255.255.255.0" maxlength="15" tabindex="0" autocomplete="false" />
+                <input class="pure-u-1 pure-u-lg-3-4 more" name="mask" type="text" action="reconnect" value="" maxlength="15" tabindex="0" autocomplete="false" />
                 <div class="pure-u-0 pure-u-lg-1-4 more"></div>
                 <div class="pure-u-1 pure-u-lg-3-4 hint more">Usually 255.255.255.0 for /24 networks</div>
 
                 <label class="pure-u-1 pure-u-lg-1-4 more">DNS IP</label>
-                <input class="pure-u-1 pure-u-lg-3-4 more" name="dns" type="text" action="reconnect" value="8.8.8.8" maxlength="15" tabindex="0" autocomplete="false" />
+                <input class="pure-u-1 pure-u-lg-3-4 more" name="dns" type="text" action="reconnect" value="" maxlength="15" tabindex="0" autocomplete="false" />
                 <div class="pure-u-0 pure-u-lg-1-4 more"></div>
                 <div class="pure-u-1 pure-u-lg-3-4 hint more">Set the Domain Name Server IP to use when using a static IP</div>
 
@@ -1387,11 +1968,12 @@
                 <label class="pure-u-1 pure-u-lg-1-4">Use UTC time</label>
                 <div class="pure-u-1 pure-u-lg-3-4"><input type="checkbox" name="schUTC" /></div>
 
+                <div class="pure-u-0 pure-u-lg-1-2"></div>
                 <label class="pure-u-1 pure-u-lg-1-4">And weekday is one of</label>
                 <div class="pure-u-2-5 pure-u-lg-1-5">
                     <input class="pure-u-23-24 pure-u-lg-23-24" name="schWDs" type="text" maxlength="15" tabindex="0" value="1,2,3,4,5,6,7" />
                 </div>
-                <div class="pure-u-3-5 pure-u-lg-1-2 hint center">&nbsp;1 for Monday, 2 for Tuesday...</div>
+                <div class="pure-u-3-5 pure-u-lg-1-2 hint center">&nbsp;1 for Monday, 2 for Tuesday etc., comma separated</div>
 
                 <div id="schActionDiv" class="pure-u-1">
                 </div>
@@ -1399,7 +1981,7 @@
                 <label class="pure-u-1 pure-u-lg-1-4">Enabled</label>
                 <div class="pure-u-1 pure-u-lg-3-4"><input type="checkbox" name="schEnabled" /></div>
 
-                <div class="pure-u-0 pure-u-lg-1-4"></div>
+                <div class="pure-u-1 pure-u-lg-1-2"></div>
                 <button class="pure-button button-del-schedule" type="button">Delete schedule</button>
             </div>
         </div>
@@ -1407,13 +1989,13 @@
         <div id="switchActionTemplate" class="template">
             <label class="pure-u-1 pure-u-lg-1-4">Action</label>
             <div class="pure-u-1 pure-u-lg-1-5">
-                <select class="pure-u-1 pure-u-lg-23-24" name="schAction">
+                <select class="pure-u-1 pure-u-lg-23-24" name="schAction" haschanged="true">
                     <option value="0">Turn OFF</option>
                     <option value="1">Turn ON</option>
                     <option value="2">Toggle</option>
                 </select>
             </div>
-            <select class="pure-u-1 pure-u-lg-1-5 isrelay" name="schSwitch"></select>
+            <select class="pure-u-1 pure-u-lg-1-5 isrelay" name="schSwitch" ></select>
             <input type="hidden" name="schType" value="1">
         </div>
 
@@ -1423,20 +2005,31 @@
             <div class="pure-u-1 pure-u-lg-1-5">
                 <input class="pure-u-2-3" name="schAction" type="number" min="0" step="1" max="255" value="0" />
             </div>
-            <select class="pure-u-1 pure-u-lg-1-5 islight" name="schSwitch"></select>
+            <select class="pure-u-1 pure-u-lg-1-5 islight" name="schSwitch" ></select>
             <input type="hidden" name="schType" value="2">
         </div>
         <!-- endRemoveIf(!light) -->
 
+        <!-- removeIf(!curtain) -->
+        <div id="curtainActionTemplate" class="template">
+            <label class="pure-u-1 pure-u-lg-1-4">Curtain position (0 = open to 100 = closed)</label>
+            <div class="pure-u-1 pure-u-lg-1-5">
+                <input class="pure-u-2-3" name="schAction" type="number" min="0" step="1" max="100" value="0" />
+            </div>
+            <select class="pure-u-1 pure-u-lg-1-5 iscurtain" name="schSwitch" ></select>
+            <input type="hidden" name="schType" value="3">
+        </div>
+        <!-- endRemoveIf(!curtain) -->
+
         <div id="relayTemplate" class="template">
             <div class="pure-g">
                 <label class="pure-u-1 pure-u-lg-1-4">Switch #<span class="id"></span></label>
-                <input name="relay" type="checkbox" on="ON" off="OFF" />
+                <div><input name="relay" type="checkbox" on="ON" off="OFF" /></div>
             </div>
         </div>
 
         <div id="relayConfigTemplate" class="template">
-            <legend>Switch #<span class="id"></span> (GPIO<span class="gpio"></span>)</legend>
+            <legend>Switch #<span class="id"></span> (<span class="gpio"></span>)</legend>
             <div class="pure-g">
                 <div class="pure-u-1 pure-u-lg-1-4"><label>Boot mode</label></div>
                 <select class="pure-u-1 pure-u-lg-3-4" name="relayBoot">
@@ -1444,6 +2037,8 @@
                     <option value="1">Always ON</option>
                     <option value="2">Same as before</option>
                     <option value="3">Toggle before</option>
+                    <option value="4">Locked OFF</option>
+                    <option value="5">Locked ON</option>
                 </select>
             </div>
             <div class="pure-g">
@@ -1458,15 +2053,20 @@
                 <div class="pure-u-1 pure-u-lg-1-4"><label>Pulse time (s)</label></div>
                 <div class="pure-u-1 pure-u-lg-1-4"><input name="relayTime" class="pure-u-1" type="number" min="0" step="0.1" max="3600" /></div>
             </div>
+            <div class="pure-g module module-sch">
+                <div class="pure-u-1 pure-u-lg-1-4"><label>Restore last schedule</label></div>
+                <div><input name="relayLastSch" data-settings-real-name="relayLastSch" type="checkbox" /></div>
+            </div>
             <div class="pure-g module module-mqtt">
                 <div class="pure-u-1 pure-u-lg-1-4"><label>MQTT group</label></div>
                 <div class="pure-u-1 pure-u-lg-3-4"><input name="mqttGroup" class="pure-u-1" tabindex="0" data="0" action="reconnect" /></div>
             </div>
             <div class="pure-g module module-mqtt">
                 <div class="pure-u-1 pure-u-lg-1-4"><label>MQTT group sync</label></div>
-                <select class="pure-u-1 pure-u-lg-3-4" name="mqttGroupInv">
+                <select class="pure-u-1 pure-u-lg-3-4" name="mqttGroupSync">
                     <option value="0">Same</option>
                     <option value="1">Inverse</option>
+                    <option value="2">Receive Only</option>
                 </select>
             </div>
             <div class="pure-g module module-mqtt">
@@ -1514,23 +2114,19 @@
         <!-- endRemoveIf(!sensor) -->
 
         <!-- removeIf(!light) -->
-        <div id="colorRGBTemplate" class="template">
+        <div id="colorTemplate" class="template">
             <div class="pure-g">
                 <label class="pure-u-1 pure-u-lg-1-4">Color</label>
                 <input class="pure-u-1 pure-u-lg-1-4" data-wcp-layout="block" name="color" readonly />
             </div>
 
+        </div>
+
+        <div id="brightnessTemplate" class="template">
             <div class="pure-g">
                 <label class="pure-u-1 pure-u-lg-1-4">Brightness</label>
                 <input type="range" min="0" max="255" class="slider pure-u-lg-1-4" id="brightness">
                 <span class="slider brightness pure-u-lg-1-4"></span>
-            </div>
-        </div>
-
-        <div id="colorHSVTemplate" class="template">
-            <div class="pure-g">
-                <label class="pure-u-1 pure-u-lg-1-4">Color</label>
-                <input class="pure-u-1 pure-u-lg-1-4" data-wcp-layout="block" name="color" readonly />
             </div>
         </div>
 
@@ -1551,6 +2147,29 @@
         </div>
         <!-- endRemoveIf(!light) -->
 
+        <!-- removeIf(!curtain) -->
+        <div id="curtainTemplate" class="template">
+            <div class="pure-g">
+                <div class="pure-u-1-1 curtain-div">
+                    <div class="curtain-roller" id="curtainGetPicture"></div>
+                </div>
+            </div>
+            <div class="pure-g">
+                <div class="pure-u-1-3 curtain-div"><button type="button" class="pure-button curtain-button button-curtain-close">CLOSE</button></div>
+                <div class="pure-u-1-3 curtain-div"><button type="button" class="pure-button curtain-button button-curtain-pause">PAUSE</button></div>
+                <div class="pure-u-1-3 curtain-div"><button type="button" class="pure-button curtain-button button-curtain-open">OPEN</button></div>
+            </div>
+            <div class="pure-g">
+                <input type="range" list="tickmarks" min="0" max="100" class="slider pure-u-1-1 reverse-range" id="curtainSet">
+                <datalist id="tickmarks">
+                    <option value="0"></option>
+                    <option value="50"></option>
+                    <option value="100"></option>
+                </datalist>
+            </div>
+        </div>
+        <!-- endRemoveIf(!curtain) -->
+
         <!-- removeIf(!sensor) -->
         <div id="magnitudeTemplate" class="template">
             <div class="pure-g">
@@ -1558,7 +2177,9 @@
                 <div class="pure-u-1 pure-u-lg-1-4">
                     <input class="pure-u-1 pure-u-lg-23-24 center" type="text" name="magnitude" data="256" readonly />
                 </div>
-                <div class="pure-u-1 pure-u-lg-1-2 hint center"></div>
+                <div class="pure-u-1 pure-u-lg-1-2 hint center sns-desc"></div>
+                <div class="pure-u-1 pure-u-lg-1 hint sns-info">
+                </div>
             </div>
         </div>
         <!-- endRemoveIf(!sensor) -->
@@ -1566,13 +2187,28 @@
         <!-- removeIf(!rfm69) -->
         <div id="nodeTemplate" class="template">
             <div class="pure-g">
-                <div class="pure-u-md-1-6 pure-u-1-2"><input name="node" type="text" class="pure-u-11-12" value="" size="8" tabindex="0" placeholder="Node ID"></div>
+                <div class="pure-u-md-1-6 pure-u-1-2"><input name="node" type="text" class="pure-u-11-12" value="" size="8" tabindex="0" placeholder="Node ID" autocomplete="false"></div>
                 <div class="pure-u-md-1-6 pure-u-1-2"><input name="key" type="text" class="pure-u-11-12" value="" size="8" tabindex="0" placeholder="Key"></div>
                 <div class="pure-u-md-1-2 pure-u-3-4"><input name="topic" type="text" class="pure-md-11-12 pure-u-23-24" value="" size="8" tabindex="0" placeholder="MQTT Topic"></div>
-                <div class="pure-u-md-1-6 pure-u-1-4"><button type="button" class="pure-button button-del-mapping pure-u-5-6 pure-u-md-5-6">Del</button></div>
+                <div class="pure-u-md-1-6 pure-u-1-4"><button type="button" class="pure-button button-del-parent pure-u-5-6 pure-u-md-5-6">Del</button></div>
             </div>
         </div>
         <!-- endRemoveIf(!rfm69) -->
+
+        <div id="rpnRuleTemplate" class="template">
+            <div class="pure-g">
+                <div class="pure-u-5-6"><input name="rpnRule" type="text" class="pure-u-23-24" value="" tabindex="0" autocomplete="false" /></div>
+                <div class="pure-u-1-6"><button type="button" class="pure-button button-del-parent pure-u-1">Del</button></div>
+            </div>
+        </div>
+
+        <div id="rpnTopicTemplate" class="template">
+            <div class="pure-g">
+                <div class="pure-u-1-2"><input name="rpnTopic" type="text" class="pure-u-23-24" value="" tabindex="0" autocomplete="false" /></div>
+                <div class="pure-u-1-3"><input name="rpnName" type="text" class="pure-u-23-24" value="" tabindex="0" autocomplete="false" /></div>
+                <div class="pure-u-1-6"><button type="button" class="pure-button button-del-parent pure-u-1">Del</button></div>
+            </div>
+        </div>
 
         <iframe id="downloader"></iframe>
         <input id="uploader" type="file" />
@@ -1580,10 +2216,10 @@
     </body>
 
     <!-- build:js script.js -->
-    <script src="vendor/jquery-3.2.1.min.js"></script>
+    <script src="vendor/jquery-3.4.1.slim.min.js"></script>
     <script src="custom.js"></script>
     <!-- removeIf(!light) -->
-    <script src="vendor/jquery.wheelcolorpicker-3.0.3.min.js"></script>
+    <script src="vendor/jquery.wheelcolorpicker-3.0.8.min.js"></script>
     <!-- endRemoveIf(!light) -->
     <!-- removeIf(!rfm69) -->
     <script src="vendor/datatables-1.10.16.min.js"></script>

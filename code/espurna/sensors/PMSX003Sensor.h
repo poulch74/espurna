@@ -9,16 +9,21 @@
 
 #pragma once
 
-#include "Arduino.h"
+#include <Arduino.h>
+#include <SoftwareSerial.h>
+
+#include "../debug.h"
 #include "BaseSensor.h"
 
-#include <SoftwareSerial.h>
+// Generic data
+#define PMS_BAUD_RATE       9600
 
 // Type of sensor
 #define PMS_TYPE_X003       0
 #define PMS_TYPE_X003_9     1
 #define PMS_TYPE_5003T      2
 #define PMS_TYPE_5003ST     3
+#define PMS_TYPE_5003S      4
 
 // Sensor type specified data
 #define PMS_SLOT_MAX        4
@@ -32,7 +37,8 @@ const static struct {
     {"PMSX003", 13, 3, {MAGNITUDE_PM1dot0, MAGNITUDE_PM2dot5, MAGNITUDE_PM10}},
     {"PMSX003_9", 9, 3, {MAGNITUDE_PM1dot0, MAGNITUDE_PM2dot5, MAGNITUDE_PM10}},
     {"PMS5003T", 13, 3, {MAGNITUDE_PM2dot5, MAGNITUDE_TEMPERATURE, MAGNITUDE_HUMIDITY}},
-    {"PMS5003ST", 17, 4, {MAGNITUDE_PM2dot5, MAGNITUDE_TEMPERATURE, MAGNITUDE_HUMIDITY, MAGNITUDE_HCHO}}
+    {"PMS5003ST", 17, 4, {MAGNITUDE_PM2dot5, MAGNITUDE_TEMPERATURE, MAGNITUDE_HUMIDITY, MAGNITUDE_HCHO}},
+    {"PMS5003S", 13, 3, {MAGNITUDE_PM2dot5, MAGNITUDE_PM10, MAGNITUDE_HCHO}},
 };
 
 // [MAGIC][LEN][DATA9|13|17][SUM]
@@ -46,7 +52,7 @@ const static struct {
 class PMSX003 {
 
     protected:
-        SoftwareSerial *_serial = NULL; // Should initialized by child class
+        Stream *_serial = NULL; // Should initialized by child class
 
     public:
 
@@ -87,7 +93,7 @@ class PMSX003 {
 
                 int avail = _serial->available();
                 #if SENSOR_DEBUG
-                    //debugSend("[SENSOR] PMS: Packet available = %d\n", avail);
+                    //DEBUG_MSG("[SENSOR] PMS: Packet available = %d\n", avail);
                 #endif
                 if (avail < PMS_PACKET_SIZE(data_count)) {
                     break;
@@ -99,7 +105,7 @@ class PMSX003 {
                     uint16_t size = read16(sum);
                     if (size != PMS_PAYLOAD_SIZE(data_count)) {
                         #if SENSOR_DEBUG
-                            debugSend(("[SENSOR] PMS: Payload size: %d != %d.\n"), size, PMS_PAYLOAD_SIZE(data_count));
+                            DEBUG_MSG(("[SENSOR] PMS: Payload size: %d != %d.\n"), size, PMS_PAYLOAD_SIZE(data_count));
                         #endif
                         break;
                     }
@@ -107,7 +113,7 @@ class PMSX003 {
                     for (int i = 0; i < data_count; i++) {
                         data[i] = read16(sum);
                         #if SENSOR_DEBUG
-                            //debugSend(("[SENSOR] PMS:   data[%d] = %d\n"), i, data[i]);
+                            //DEBUG_MSG(("[SENSOR] PMS:   data[%d] = %d\n"), i, data[i]);
                         #endif
                     }
 
@@ -116,7 +122,7 @@ class PMSX003 {
                         return true;
                     } else {
                         #if SENSOR_DEBUG
-                            debugSend(("[SENSOR] PMS checksum: %04X != %04X\n"), sum, checksum);
+                            DEBUG_MSG(("[SENSOR] PMS checksum: %04X != %04X\n"), sum, checksum);
                         #endif
                     }
                     break;
@@ -153,14 +159,13 @@ class PMSX003Sensor : public BaseSensor, PMSX003 {
         // ---------------------------------------------------------------------
         // Public
         // ---------------------------------------------------------------------
-
-        PMSX003Sensor(): BaseSensor() {
+        PMSX003Sensor() {
             _count = pms_specs[_type].slot_count;
             _sensor_id = SENSOR_PMSX003_ID;
         }
 
         ~PMSX003Sensor() {
-            if (_serial) delete _serial;
+            removeSerial();
         }
 
         void setRX(unsigned char pin_rx) {
@@ -175,7 +180,13 @@ class PMSX003Sensor : public BaseSensor, PMSX003 {
             _dirty = true;
         }
 
-        // Should call setType after constrcutor immediately to enable corresponding slot count
+        void setSerial(HardwareSerial * serial) {
+            _soft = false;
+            _serial = serial;
+            _dirty = true;
+        }
+
+        // Should call setType after constructor immediately to enable corresponding slot count
         void setType(unsigned char type) {
             _type = type;
             _count = pms_specs[_type].slot_count;
@@ -204,30 +215,45 @@ class PMSX003Sensor : public BaseSensor, PMSX003 {
 
             if (!_dirty) return;
 
-            if (_serial) delete _serial;
+            if (_soft) {
+                if (_serial) removeSerial();
+                _serial = new SoftwareSerial(_pin_rx, _pin_tx, false, 64);
+                static_cast<SoftwareSerial*>(_serial)->enableIntTx(false);
+            }
 
-            _serial = new SoftwareSerial(_pin_rx, _pin_tx, false, 64);
-            _serial->enableIntTx(false);
-            _serial->begin(9600);
+            if (_soft) {
+                static_cast<SoftwareSerial*>(_serial)->begin(PMS_BAUD_RATE);
+            } else {
+                static_cast<HardwareSerial*>(_serial)->begin(PMS_BAUD_RATE);
+            }
+
             passiveMode();
 
             _startTime = millis();
             _ready = true;
             _dirty = false;
-
         }
 
         // Descriptive name of the sensor
         String description() {
             char buffer[28];
-            snprintf(buffer, sizeof(buffer), "%s @ SwSerial(%u,%u)", pms_specs[_type].name, _pin_rx, _pin_tx);
+            if (_soft) {
+                snprintf(buffer, sizeof(buffer), "%s @ SwSerial(%u,%u)", pms_specs[_type].name, _pin_rx, _pin_tx);
+            } else {
+                snprintf(buffer, sizeof(buffer), "%s @ HwSerial", pms_specs[_type].name);
+            }
+
             return String(buffer);
         }
 
         // Descriptive name of the slot # index
-        String slot(unsigned char index) {
+        String description(unsigned char index) {
             char buffer[36] = {0};
-            snprintf(buffer, sizeof(buffer), "%d @ %s @ SwSerial(%u,%u)", int(index + 1), pms_specs[_type].name, _pin_rx, _pin_tx);
+            if (_soft) {
+                snprintf(buffer, sizeof(buffer), "%d @ %s @ SwSerial(%u,%u)", int(index + 1), pms_specs[_type].name, _pin_rx, _pin_tx);
+            } else {
+                snprintf(buffer, sizeof(buffer), "%d @ %s @ HwSerial", int(index + 1), pms_specs[_type].name);
+            }
             return String(buffer);
         }
 
@@ -250,15 +276,13 @@ class PMSX003Sensor : public BaseSensor, PMSX003 {
                 return;
             }
 
-            _error = SENSOR_ERROR_OK;
-
             #if PMS_SMART_SLEEP
                 unsigned int readCycle;
                 if (_readCount++ > 30) {
                     readCycle = _readCount % 30;
                     if (readCycle == 0) {
                         #if SENSOR_DEBUG
-                            debugSend("[SENSOR] %s: Wake up: %d\n", pms_specs[_type].name, _readCount);
+                            DEBUG_MSG("[SENSOR] %s: Wake up: %d\n", pms_specs[_type].name, _readCount);
                         #endif
                         wakeUp();
                         return;
@@ -269,24 +293,49 @@ class PMSX003Sensor : public BaseSensor, PMSX003 {
                     }
                 } else {
                    readCycle  = -1;
+                   if (_readCount == 1) {
+                       wakeUp();
+                   }
                 }
             #endif
 
             uint16_t data[PMS_DATA_MAX];
             if (readData(data, pms_specs[_type].data_count)) {
                 if (_type == PMS_TYPE_5003ST) {
+                    if (data[14] > 10 && data[14] < 1000 && data[13] < 1000) {
+                        _slot_values[0] = data[4];
+                        _slot_values[1] = (double)data[13] / 10;
+                        _slot_values[2] = (double)data[14] / 10;
+                        _slot_values[3] = (double)data[12] / 1000;
+                        _error = SENSOR_ERROR_OK;
+                    } else {
+                        _error = SENSOR_ERROR_OUT_OF_RANGE;
+                        #if SENSOR_DEBUG
+                            DEBUG_MSG("[SENSOR] %s: Invalid temperature=%d humidity=%d.\n", pms_specs[_type].name, (int)data[13], (int)data[14]);
+                        #endif
+                    }
+                } else if (_type == PMS_TYPE_5003S) {
                     _slot_values[0] = data[4];
-                    _slot_values[1] = (double)data[13] / 10;
-                    _slot_values[2] = (double)data[14] / 10;
-                    _slot_values[3] = (double)data[12] / 1000;
+                    _slot_values[1] = data[5];
+                    _slot_values[2] = (double)data[12] / 1000;
+                    _error = SENSOR_ERROR_OK;
                 } else if (_type == PMS_TYPE_5003T) {
-                    _slot_values[0] = data[4];
-                    _slot_values[1] = (double)data[10] / 10;
-                    _slot_values[2] = (double)data[11] / 10;
+                    if (data[11] > 10 && data[11] < 1000 && data[10] < 1000) {
+                        _slot_values[0] = data[4];
+                        _slot_values[1] = (double)data[10] / 10;
+                        _slot_values[2] = (double)data[11] / 10;
+                        _error = SENSOR_ERROR_OK;
+                    } else {
+                        _error = SENSOR_ERROR_OUT_OF_RANGE;
+                        #if SENSOR_DEBUG
+                            DEBUG_MSG("[SENSOR] %s: Invalid temperature=%d humidity=%d.\n", pms_specs[_type].name, (int)data[10], (int)data[11]);
+                        #endif
+                    }
                 } else {
                     _slot_values[0] = data[3];
                     _slot_values[1] = data[4];
                     _slot_values[2] = data[5];
+                    _error = SENSOR_ERROR_OK;
                 }
             }
 
@@ -294,14 +343,14 @@ class PMSX003Sensor : public BaseSensor, PMSX003 {
                 if (readCycle == 6) {
                     sleep();
                     #if SENSOR_DEBUG
-                        debugSend("[SENSOR] %s: Enter sleep mode: %d\n", pms_specs[_type].name, _readCount);
+                        DEBUG_MSG("[SENSOR] %s: Enter sleep mode: %d\n", pms_specs[_type].name, _readCount);
                     #endif
                     return;
                 }
             #endif
 
             requestRead();
-            
+
         }
 
         // Current value for slot # index
@@ -309,7 +358,15 @@ class PMSX003Sensor : public BaseSensor, PMSX003 {
             return _slot_values[index];
         }
 
+    private:
+        void removeSerial() {
+            if (_serial && _soft) {
+                delete static_cast<SoftwareSerial*>(_serial);
+            }
+        }
+
     protected:
+        bool _soft = true;
         unsigned int _pin_rx;
         unsigned int _pin_tx;
         unsigned long _startTime;
@@ -322,4 +379,4 @@ class PMSX003Sensor : public BaseSensor, PMSX003 {
 
 };
 
-#endif // SENSOR_SUPPORT && PMS_SUPPORT
+#endif // SENSOR_SUPPORT && PMSX003_SUPPORT

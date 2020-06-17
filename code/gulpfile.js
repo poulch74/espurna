@@ -2,7 +2,7 @@
 
 ESP8266 file system builder
 
-Copyright (C) 2016-2018 by Xose Pérez <xose dot perez at gmail dot com>
+Copyright (C) 2016-2019 by Xose Pérez <xose dot perez at gmail dot com>
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -19,35 +19,37 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-/*eslint quotes: ["error", "single"]*/
+/*eslint quotes: ['error', 'single']*/
 /*eslint-env es6*/
 
 // -----------------------------------------------------------------------------
 // Dependencies
 // -----------------------------------------------------------------------------
 
-const fs = require('fs');
 const gulp = require('gulp');
+const through = require('through2');
+
 const htmlmin = require('gulp-htmlmin');
-const uglify = require('gulp-uglify');
-const gzip = require('gulp-gzip');
 const inline = require('gulp-inline');
 const inlineImages = require('gulp-css-base64');
 const favicon = require('gulp-base64-favicon');
+const crass = require('gulp-crass');
+
 const htmllint = require('gulp-htmllint');
 const csslint = require('gulp-csslint');
-const crass = require('gulp-crass');
+
+const rename = require('gulp-rename');
 const replace = require('gulp-replace');
 const remover = require('gulp-remove-code');
-const map = require('map-stream');
-const rename = require('gulp-rename');
-const runSequence = require('run-sequence');
+const gzip = require('gulp-gzip');
 const path = require('path');
 
 // -----------------------------------------------------------------------------
 // Configuration
 // -----------------------------------------------------------------------------
 
+const htmlFolder = 'html/';
+const configFolder = 'espurna/config/';
 const dataFolder = 'espurna/data/';
 const staticFolder = 'espurna/static/';
 
@@ -55,51 +57,39 @@ const staticFolder = 'espurna/static/';
 // Methods
 // -----------------------------------------------------------------------------
 
-var buildHeaderFile = function() {
+var toHeader = function(name, debug) {
 
-    String.prototype.replaceAll = function(search, replacement) {
-        var target = this;
-        return target.split(search).join(replacement);
-    };
+    return through.obj(function (source, encoding, callback) {
 
-    return map(function(file, cb) {
-
-        var parts = file.path.split(path.sep);
+        var parts = source.path.split(path.sep);
         var filename = parts[parts.length - 1];
-        var destination = staticFolder + filename + ".h";
-        var safename = "webui_image";
+        var safename = name || filename.split('.').join('_');
 
-        var wstream = fs.createWriteStream(destination);
-        wstream.on('error', function (err) {
-            console.error(err);
-        });
+        // Generate output
+        var output = '';
+        output += '#define ' + safename + '_len ' + source.contents.length + '\n';
+        output += 'const uint8_t ' + safename + '[] PROGMEM = {';
+        for (var i=0; i<source.contents.length; i++) {
+            if (i > 0) { output += ','; }
+            if (0 === (i % 20)) { output += '\n'; }
+            output += '0x' + ('00' + source.contents[i].toString(16)).slice(-2);
+        }
+        output += '\n};';
 
-        var data = fs.readFileSync(file.path);
+        // clone the contents
+        var destination = source.clone();
+        destination.path = source.path + '.h';
+        destination.contents = Buffer.from(output);
 
-        wstream.write('#define ' + safename + '_len ' + data.length + '\n');
-        wstream.write('const uint8_t ' + safename + '[] PROGMEM = {');
-
-        for (var i=0; i<data.length; i++) {
-            if (0 === (i % 20)) {
-                wstream.write('\n');
-            }
-            wstream.write('0x' + ('00' + data[i].toString(16)).slice(-2));
-            if (i < (data.length - 1)) {
-                wstream.write(',');
-            }
+        if (debug) {
+            console.info('Image ' + filename + ' \tsize: ' + source.contents.length + ' bytes');
         }
 
-        wstream.write('\n};');
-        wstream.end();
-
-        var fstat = fs.statSync(file.path);
-        console.log("Created '" + filename + "' size: " + fstat.size + " bytes");
-
-        cb(0, destination);
+        callback(null, destination);
 
     });
 
-}
+};
 
 var htmllintReporter = function(filepath, issues) {
     if (issues.length > 0) {
@@ -119,27 +109,52 @@ var htmllintReporter = function(filepath, issues) {
 
 var buildWebUI = function(module) {
 
-    var modules = {"light": false, "sensor": false, "rfbridge": false, "rfm69": false};
-    if ("all" == module) {
-        modules["light"] = true;
-        modules["sensor"] = true;
-        modules["rfbridge"] = false;   // we will never be adding this except when building RFBRIDGE
-        modules["rfm69"] = false;   // we will never be adding this except when building RFM69GW
-    } else if ("small" != module) {
+    // Declare some modules as optional to remove with
+    // removeIf(!name) ...code... endRemoveIf(!name) sections
+    // (via gulp-remove-code)
+    var modules = {
+        'light': false,
+        'sensor': false,
+        'rfbridge': false,
+        'rfm69': false,
+        'thermostat': false,
+        'lightfox': false,
+        'curtain': false
+    };
+
+    // Note: only build these when specified as module arg
+    var excludeAll = [
+        'rfm69',
+        'lightfox'
+    ];
+
+    // 'all' to include all *but* excludeAll
+    // '<module>' to include a single module
+    // 'small' is the default state (all disabled)
+    if ('all' === module) {
+        Object.keys(modules).
+            filter(function(key) {
+                return excludeAll.indexOf(key) < 0;
+            }).
+            forEach(function(key) {
+                modules[key] = true;
+            });
+    } else if ('small' !== module) {
         modules[module] = true;
     }
 
-    return gulp.src('html/*.html').
+    return gulp.src(htmlFolder + '*.html').
         pipe(htmllint({
             'failOnError': true,
             'rules': {
                 'id-class-style': false,
                 'label-req-for': false,
+                'line-end-style': false,
             }
         }, htmllintReporter)).
         pipe(favicon()).
         pipe(inline({
-            base: 'html/',
+            base: htmlFolder,
             js: [],
             css: [crass, inlineImages],
             disabledTypes: ['svg', 'img']
@@ -152,9 +167,11 @@ var buildWebUI = function(module) {
             minifyJS: true
         })).
         pipe(replace('pure-', 'p-')).
-        pipe(gzip()).
-        pipe(rename("index." + module + ".html.gz")).
-        pipe(gulp.dest(dataFolder));
+        pipe(gzip({ gzipOptions: { level: 9 } })).
+        pipe(rename('index.' + module + '.html.gz')).
+        pipe(gulp.dest(dataFolder)).
+        pipe(toHeader('webui_image', true)).
+        pipe(gulp.dest(staticFolder));
 
 };
 
@@ -162,55 +179,66 @@ var buildWebUI = function(module) {
 // Tasks
 // -----------------------------------------------------------------------------
 
-gulp.task('build_certs', function() {
+gulp.task('certs', function() {
     gulp.src(dataFolder + 'server.*').
-        pipe(buildHeaderFile());
+        pipe(toHeader(debug=false)).
+        pipe(gulp.dest(staticFolder));
 });
 
 gulp.task('csslint', function() {
-    gulp.src('html/*.css').
+    gulp.src(htmlFolder + '*.css').
         pipe(csslint({ids: false})).
         pipe(csslint.formatter());
 });
 
-gulp.task('build_webui_small', function() {
-    return buildWebUI("small");
-})
-
-gulp.task('build_webui_sensor', function() {
-    return buildWebUI("sensor");
-})
-
-gulp.task('build_webui_light', function() {
-    return buildWebUI("light");
-})
-
-gulp.task('build_webui_rfbridge', function() {
-    return buildWebUI("rfbridge");
-})
-
-gulp.task('build_webui_rfm69', function() {
-    return buildWebUI("rfm69");
-})
-
-gulp.task('build_webui_all', function() {
-    return buildWebUI("all");
-})
-
-gulp.task('buildfs_inline', function(cb) {
-    runSequence([
-        'build_webui_small',
-        'build_webui_sensor',
-        'build_webui_light',
-        'build_webui_rfbridge',
-        'build_webui_rfm69',
-        'build_webui_all'
-    ], cb);
+gulp.task('webui_small', function() {
+    return buildWebUI('small');
 });
 
-gulp.task('buildfs_embeded', ['buildfs_inline'], function() {
-    gulp.src(dataFolder + 'index.*').
-        pipe(buildHeaderFile());
+gulp.task('webui_sensor', function() {
+    return buildWebUI('sensor');
 });
 
-gulp.task('default', ['buildfs_embeded']);
+gulp.task('webui_light', function() {
+    return buildWebUI('light');
+});
+
+gulp.task('webui_rfbridge', function() {
+    return buildWebUI('rfbridge');
+});
+
+gulp.task('webui_rfm69', function() {
+    return buildWebUI('rfm69');
+});
+
+gulp.task('webui_lightfox', function() {
+    return buildWebUI('lightfox');
+});
+
+gulp.task('webui_thermostat', function() {
+    return buildWebUI('thermostat');
+});
+
+gulp.task('webui_curtain', function() {
+    return buildWebUI('curtain');
+});
+
+gulp.task('webui_all', function() {
+    return buildWebUI('all');
+});
+
+gulp.task('webui',
+    gulp.parallel(
+        'webui_small',
+        'webui_sensor',
+        'webui_light',
+        'webui_rfbridge',
+        'webui_rfm69',
+        'webui_lightfox',
+        'webui_thermostat',
+        'webui_curtain',
+        'webui_all'
+    )
+);
+
+gulp.task('default', gulp.series('webui'));

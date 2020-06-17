@@ -1,19 +1,20 @@
 // -----------------------------------------------------------------------------
 // Event Counter Sensor
-// Copyright (C) 2017-2018 by Xose Pérez <xose dot perez at gmail dot com>
+// Copyright (C) 2017-2019 by Xose Pérez <xose dot perez at gmail dot com>
 // -----------------------------------------------------------------------------
 
 #if SENSOR_SUPPORT && HLW8012_SUPPORT
 
 #pragma once
 
-#include "Arduino.h"
-#include "BaseSensor.h"
-
-#include <ESP8266WiFi.h>
+#include <Arduino.h>
 #include <HLW8012.h>
 
-class HLW8012Sensor : public BaseSensor {
+#include "../debug.h"
+
+#include "BaseEmonSensor.h"
+
+class HLW8012Sensor : public BaseEmonSensor {
 
     public:
 
@@ -21,8 +22,8 @@ class HLW8012Sensor : public BaseSensor {
         // Public
         // ---------------------------------------------------------------------
 
-        HLW8012Sensor(): BaseSensor() {
-            _count = 7;
+        HLW8012Sensor() {
+            _count = 8;
             _sensor_id = SENSOR_HLW8012_ID;
             _hlw8012 = new HLW8012();
         }
@@ -30,26 +31,6 @@ class HLW8012Sensor : public BaseSensor {
         ~HLW8012Sensor() {
             _enableInterrupts(false);
             delete _hlw8012;
-        }
-
-        void expectedCurrent(double expected) {
-            _hlw8012->expectedCurrent(expected);
-        }
-
-        void expectedVoltage(unsigned int expected) {
-            _hlw8012->expectedVoltage(expected);
-        }
-
-        void expectedPower(unsigned int expected) {
-            _hlw8012->expectedActivePower(expected);
-        }
-
-        void resetRatios() {
-            _hlw8012->resetMultipliers();
-        }
-
-        void resetEnergy() {
-            _hlw8012->resetEnergy();
         }
 
         // ---------------------------------------------------------------------
@@ -76,16 +57,60 @@ class HLW8012Sensor : public BaseSensor {
             _sel_current = value;
         }
 
-        void setCurrentRatio(double value) {
+        // ---------------------------------------------------------------------
+
+        void expectedCurrent(double expected) override {
+            _hlw8012->expectedCurrent(expected);
+        }
+
+        void expectedVoltage(unsigned int expected) override {
+            _hlw8012->expectedVoltage(expected);
+        }
+
+        void expectedPower(unsigned int expected) override {
+            _hlw8012->expectedActivePower(expected);
+        }
+
+        double defaultCurrentRatio() const override {
+            return HLW8012_CURRENT_RATIO;
+        }
+
+        double defaultVoltageRatio() const override {
+            return HLW8012_VOLTAGE_RATIO;
+        }
+
+        double defaultPowerRatio() const override {
+            return HLW8012_POWER_RATIO;
+        }
+
+        void resetRatios() override {
+            _hlw8012->setCurrentMultiplier(_initialRatioC);
+            _hlw8012->setVoltageMultiplier(_initialRatioV);
+            _hlw8012->setPowerMultiplier(_initialRatioP);
+        }
+
+        void setCurrentRatio(double value) override {
             _hlw8012->setCurrentMultiplier(value);
         };
 
-        void setVoltageRatio(double value) {
+        void setVoltageRatio(double value) override {
             _hlw8012->setVoltageMultiplier(value);
         };
 
-        void setPowerRatio(double value) {
+        void setPowerRatio(double value) override {
             _hlw8012->setPowerMultiplier(value);
+        };
+
+        double getCurrentRatio() override {
+            return _hlw8012->getCurrentMultiplier();
+        };
+
+        double getVoltageRatio() override {
+            return _hlw8012->getVoltageMultiplier();
+        };
+
+        double getPowerRatio() override {
+            return _hlw8012->getPowerMultiplier();
         };
 
         // ---------------------------------------------------------------------
@@ -105,18 +130,6 @@ class HLW8012Sensor : public BaseSensor {
         unsigned char getSELCurrent() {
             return _sel_current;
         }
-
-        double getCurrentRatio() {
-            return _hlw8012->getCurrentMultiplier();
-        };
-
-        double getVoltageRatio() {
-            return _hlw8012->getVoltageMultiplier();
-        };
-
-        double getPowerRatio() {
-            return _hlw8012->getPowerMultiplier();
-        };
 
         // ---------------------------------------------------------------------
         // Sensors API
@@ -138,23 +151,13 @@ class HLW8012Sensor : public BaseSensor {
                 _hlw8012->begin(_cf, _cf1, _sel, _sel_current, false, 1000000);
             #endif
 
-            // These values are used to calculate current, voltage and power factors as per datasheet formula
-            // These are the nominal values for the Sonoff POW resistors:
-            // * The CURRENT_RESISTOR is the 1milliOhm copper-manganese resistor in series with the main line
-            // * The VOLTAGE_RESISTOR_UPSTREAM are the 5 470kOhm resistors in the voltage divider that feeds the V2P pin in the HLW8012
-            // * The VOLTAGE_RESISTOR_DOWNSTREAM is the 1kOhm resistor in the voltage divider that feeds the V2P pin in the HLW8012
-            _hlw8012->setResistors(HLW8012_CURRENT_R, HLW8012_VOLTAGE_R_UP, HLW8012_VOLTAGE_R_DOWN);
+            // Adjust with ratio values that could be set in the hardware profile
+            _defaultRatios();
 
             // Handle interrupts
-            #if HLW8012_USE_INTERRUPTS
+            #if HLW8012_USE_INTERRUPTS && (!HLW8012_WAIT_FOR_WIFI)
+                _enableInterrupts(false);
                 _enableInterrupts(true);
-            #else
-                _onconnect_handler = WiFi.onStationModeGotIP([this](WiFiEventStationModeGotIP ipInfo) {
-                    _enableInterrupts(true);
-                });
-                _ondisconnect_handler = WiFi.onStationModeDisconnected([this](WiFiEventStationModeDisconnected ipInfo) {
-                    _enableInterrupts(false);
-                });
             #endif
 
             _ready = true;
@@ -163,19 +166,19 @@ class HLW8012Sensor : public BaseSensor {
 
         // Descriptive name of the sensor
         String description() {
-            char buffer[25];
+            char buffer[28];
             snprintf(buffer, sizeof(buffer), "HLW8012 @ GPIO(%u,%u,%u)", _sel, _cf, _cf1);
             return String(buffer);
         }
 
         // Descriptive name of the slot # index
-        String slot(unsigned char index) {
+        String description(unsigned char index) {
             return description();
         };
 
         // Address of the sensor (it could be the GPIO or I2C address)
         String address(unsigned char index) {
-            char buffer[10];
+            char buffer[12];
             snprintf(buffer, sizeof(buffer), "%u:%u:%u", _sel, _cf, _cf1);
             return String(buffer);
         }
@@ -188,8 +191,13 @@ class HLW8012Sensor : public BaseSensor {
             if (index == 3) return MAGNITUDE_POWER_REACTIVE;
             if (index == 4) return MAGNITUDE_POWER_APPARENT;
             if (index == 5) return MAGNITUDE_POWER_FACTOR;
-            if (index == 6) return MAGNITUDE_ENERGY;
+            if (index == 6) return MAGNITUDE_ENERGY_DELTA;
+            if (index == 7) return MAGNITUDE_ENERGY;
             return MAGNITUDE_NONE;
+        }
+
+        double getEnergyDelta() {
+            return _energy_last;
         }
 
         // Current value for slot # index
@@ -200,14 +208,27 @@ class HLW8012Sensor : public BaseSensor {
             if (index == 3) return _hlw8012->getReactivePower();
             if (index == 4) return _hlw8012->getApparentPower();
             if (index == 5) return 100 * _hlw8012->getPowerFactor();
-            if (index == 6) return _hlw8012->getEnergy();
-            return 0;
+            if (index == 6) return getEnergyDelta();
+            if (index == 7) return getEnergy();
+            return 0.0;
         }
 
-        // Toggle between current and voltage monitoring
-        #if HLW8012_USE_INTERRUPTS == 0
-        // Post-read hook (usually to reset things)
-        void post() { _hlw8012->toggleMode(); }
+        // Pre-read hook (usually to populate registers with up-to-date data)
+        void pre() {
+            #if HLW8012_USE_INTERRUPTS && HLW8012_WAIT_FOR_WIFI
+                _enableInterrupts(wifiConnected());
+            #endif
+
+            _energy_last = _hlw8012->getEnergy();
+            _energy[0] += sensor::Ws { _energy_last };
+            _hlw8012->resetEnergy();
+        }
+
+        #if !HLW8012_USE_INTERRUPTS
+        // Toggle between current and voltage monitoring after reading
+        void post() {
+            _hlw8012->toggleMode();
+        }
         #endif // HLW8012_USE_INTERRUPTS == 0
 
         // Handle interrupt calls
@@ -217,6 +238,25 @@ class HLW8012Sensor : public BaseSensor {
         }
 
     protected:
+
+        void _defaultRatios() {
+            // These values are used to calculate current, voltage and power factors as per datasheet formula
+            // These are the nominal values for the Sonoff POW resistors:
+            // * The CURRENT_RESISTOR is the 1milliOhm copper-manganese resistor in series with the main line
+            // * The VOLTAGE_RESISTOR_UPSTREAM are the 5 470kOhm resistors in the voltage divider that feeds the V2P pin in the HLW8012
+            // * The VOLTAGE_RESISTOR_DOWNSTREAM is the 1kOhm resistor in the voltage divider that feeds the V2P pin in the HLW8012
+            _hlw8012->setResistors(HLW8012_CURRENT_R, HLW8012_VOLTAGE_R_UP, HLW8012_VOLTAGE_R_DOWN);
+
+            // Multipliers are already set, but we might have changed default values via the hardware profile
+            if (defaultCurrentRatio() > 0.0) _hlw8012->setCurrentMultiplier(defaultCurrentRatio());
+            if (defaultVoltageRatio() > 0.0) _hlw8012->setVoltageMultiplier(defaultVoltageRatio());
+            if (defaultPowerRatio() > 0.0) _hlw8012->setPowerMultiplier(defaultPowerRatio());
+
+            // Preserve ratios as a fallback
+            _initialRatioC = getCurrentRatio();
+            _initialRatioV = getVoltageRatio();
+            _initialRatioP = getPowerRatio();
+        }
 
         // ---------------------------------------------------------------------
         // Interrupt management
@@ -246,10 +286,15 @@ class HLW8012Sensor : public BaseSensor {
 
             } else {
 
-                _detach(_cf);
-                _detach(_cf1);
-                _interrupt_cf = GPIO_NONE;
-                _interrupt_cf1 = GPIO_NONE;
+                if (GPIO_NONE != _interrupt_cf) {
+                    _detach(_interrupt_cf);
+                    _interrupt_cf = GPIO_NONE;
+                }
+
+                if (GPIO_NONE != _interrupt_cf1) {
+                    _detach(_interrupt_cf1);
+                    _interrupt_cf1 = GPIO_NONE;
+                }
 
             }
 
@@ -257,17 +302,18 @@ class HLW8012Sensor : public BaseSensor {
 
         // ---------------------------------------------------------------------
 
+        double _initialRatioC;
+        double _initialRatioV;
+        double _initialRatioP;
+
         unsigned char _sel = GPIO_NONE;
         unsigned char _cf = GPIO_NONE;
         unsigned char _cf1 = GPIO_NONE;
         bool _sel_current = true;
 
-        HLW8012 * _hlw8012 = NULL;
+        uint32_t _energy_last = 0;
 
-        #if HLW8012_USE_INTERRUPTS == 0
-            WiFiEventHandler _onconnect_handler;
-            WiFiEventHandler _ondisconnect_handler;
-        #endif
+        HLW8012 * _hlw8012 = NULL;
 
 };
 

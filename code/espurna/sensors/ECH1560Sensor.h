@@ -1,16 +1,20 @@
 // -----------------------------------------------------------------------------
 // ECH1560 based power monitor
-// Copyright (C) 2017-2018 by Xose Pérez <xose dot perez at gmail dot com>
+// Copyright (C) 2017-2019 by Xose Pérez <xose dot perez at gmail dot com>
 // -----------------------------------------------------------------------------
 
 #if SENSOR_SUPPORT && ECH1560_SUPPORT
 
 #pragma once
 
-#include "Arduino.h"
-#include "BaseSensor.h"
+#include <Arduino.h>
 
-class ECH1560Sensor : public BaseSensor {
+#include "../debug.h"
+
+#include "BaseSensor.h"
+#include "BaseEmonSensor.h"
+
+class ECH1560Sensor : public BaseEmonSensor {
 
     public:
 
@@ -18,7 +22,7 @@ class ECH1560Sensor : public BaseSensor {
         // Public
         // ---------------------------------------------------------------------
 
-        ECH1560Sensor(): BaseSensor(), _data() {
+        ECH1560Sensor(): _data() {
             _count = 3;
             _sensor_id = SENSOR_ECH1560_ID;
         }
@@ -90,7 +94,7 @@ class ECH1560Sensor : public BaseSensor {
         }
 
         // Descriptive name of the slot # index
-        String slot(unsigned char index) {
+        String description(unsigned char index) {
             return description();
         };
 
@@ -106,6 +110,7 @@ class ECH1560Sensor : public BaseSensor {
             if (index == 0) return MAGNITUDE_CURRENT;
             if (index == 1) return MAGNITUDE_VOLTAGE;
             if (index == 2) return MAGNITUDE_POWER_APPARENT;
+            if (index == 3) return MAGNITUDE_ENERGY;
             return MAGNITUDE_NONE;
         }
 
@@ -114,12 +119,13 @@ class ECH1560Sensor : public BaseSensor {
             if (index == 0) return _current;
             if (index == 1) return _voltage;
             if (index == 2) return _apparent;
+            if (index == 3) return getEnergy();
             return 0;
         }
 
         void ICACHE_RAM_ATTR handleInterrupt(unsigned char gpio) {
 
-            (void) gpio;
+            UNUSED(gpio);
 
             // if we are trying to find the sync-time (CLK goes high for 1-2ms)
             if (_dosync == false) {
@@ -259,6 +265,14 @@ class ECH1560Sensor : public BaseSensor {
                 // power = (byte1*255+byte2+byte3/255)/2
                 _apparent = ( (float) byte1 * 255 + (float) byte2 + (float) byte3 / 255.0) / 2;
                 _current = _apparent / _voltage;
+
+                static unsigned long last = 0;
+                if (last > 0) {
+                    _energy[0] += sensor::Ws {
+                        static_cast<uint32_t>(_apparent * (millis() - last) / 1000)
+                    };
+                }
+                last = millis();
 
                 _dosync = false;
 

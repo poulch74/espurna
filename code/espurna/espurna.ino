@@ -2,7 +2,7 @@
 
 ESPurna
 
-Copyright (C) 2016-2018 by Xose Pérez <xose dot perez at gmail dot com>
+Copyright (C) 2016-2019 by Xose Pérez <xose dot perez at gmail dot com>
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -19,174 +19,48 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 */
 
-#include "config/all.h"
-#include <vector>
+// !!! NOTICE !!!
+// 
+// This file is only for compatibility with Arduino IDE / arduino-cli
+// See main.cpp
+//
 
-std::vector<void (*)()> _loop_callbacks;
+#include "espurna.h"
 
-// -----------------------------------------------------------------------------
-// REGISTER
-// -----------------------------------------------------------------------------
+#include "alexa.h"
+#include "api.h"
+#include "broker.h"
+#include "button.h"
+#include "crash.h"
+#include "debug.h"
+#include "domoticz.h"
+#include "homeassistant.h"
+#include "i2c.h"
+#include "influxdb.h"
+#include "ir.h"
+#include "led.h"
+#include "light.h"
+#include "llmnr.h"
+#include "mdns.h"
+#include "mqtt.h"
+#include "netbios.h"
+#include "nofuss.h"
+#include "ntp.h"
+#include "ota.h"
+#include "relay.h"
+#include "rfbridge.h"
+#include "rfm69.h"
+#include "rpc.h"
+#include "rpnrules.h"
+#include "rtcmem.h"
+#include "scheduler.h"
+#include "sensor.h"
+#include "ssdp.h"
+#include "telnet.h"
+#include "thermostat.h"
+#include "thingspeak.h"
+#include "tuya.h"
+#include "uartmqtt.h"
+#include "web.h"
+#include "ws.h"
 
-void espurnaRegisterLoop(void (*callback)()) {
-    _loop_callbacks.push_back(callback);
-}
-
-// -----------------------------------------------------------------------------
-// BOOTING
-// -----------------------------------------------------------------------------
-
-void setup() {
-
-    // -------------------------------------------------------------------------
-    // Basic modules, will always run
-    // -------------------------------------------------------------------------
-
-    // Serial debug
-    #if DEBUG_SUPPORT
-        debugSetup();
-    #endif
-
-    // Init EEPROM
-    eepromSetup();
-
-    // Init Serial, SPIFFS and system check
-    systemSetup();
-
-    // Init persistance and terminal features
-    settingsSetup();
-
-    // Hostname & board name initialization
-    if (getSetting("hostname").length() == 0) {
-        setDefaultHostname();
-    }
-    setBoardName();
-
-    // Show welcome message and system configuration
-    info();
-
-    wifiSetup();
-    otaSetup();
-    #if TELNET_SUPPORT
-        telnetSetup();
-    #endif
-
-    // -------------------------------------------------------------------------
-    // Check if system is stable
-    // -------------------------------------------------------------------------
-
-    #if SYSTEM_CHECK_ENABLED
-        if (!systemCheck()) return;
-    #endif
-
-    // -------------------------------------------------------------------------
-    // Next modules will be only loaded if system is flagged as stable
-    // -------------------------------------------------------------------------
-
-    // Init webserver required before any module that uses API
-    #if WEB_SUPPORT
-        webSetup();
-        wsSetup();
-        apiSetup();
-        #if DEBUG_WEB_SUPPORT
-            debugWebSetup();
-        #endif
-    #endif
-
-    // lightSetup must be called before relaySetup
-    #if LIGHT_PROVIDER != LIGHT_PROVIDER_NONE
-        lightSetup();
-    #endif
-
-    relaySetup();
-    #if BUTTON_SUPPORT
-        buttonSetup();
-    #endif
-    #if LED_SUPPORT
-        ledSetup();
-    #endif
-    #if MQTT_SUPPORT
-        mqttSetup();
-    #endif
-    #if MDNS_SERVER_SUPPORT
-        mdnsServerSetup();
-    #endif
-    #if MDNS_CLIENT_SUPPORT
-        mdnsClientSetup();
-    #endif
-    #if LLMNR_SUPPORT
-        llmnrSetup();
-    #endif
-    #if NETBIOS_SUPPORT
-        netbiosSetup();
-    #endif
-    #if SSDP_SUPPORT
-        ssdpSetup();
-    #endif
-    #if NTP_SUPPORT
-        ntpSetup();
-    #endif
-    #if I2C_SUPPORT
-        i2cSetup();
-    #endif
-    #ifdef ITEAD_SONOFF_RFBRIDGE
-        rfbSetup();
-    #endif
-    #if ALEXA_SUPPORT
-        alexaSetup();
-    #endif
-    #if NOFUSS_SUPPORT
-        nofussSetup();
-    #endif
-    #if INFLUXDB_SUPPORT
-        idbSetup();
-    #endif
-    #if THINGSPEAK_SUPPORT
-        tspkSetup();
-    #endif
-    #if RFM69_SUPPORT
-        rfm69Setup();
-    #endif
-    #if RF_SUPPORT
-        rfSetup();
-    #endif
-    #if IR_SUPPORT
-        irSetup();
-    #endif
-    #if DOMOTICZ_SUPPORT
-        domoticzSetup();
-    #endif
-    #if HOMEASSISTANT_SUPPORT
-        haSetup();
-    #endif
-    #if SENSOR_SUPPORT
-        sensorSetup();
-    #endif
-    #if SCHEDULER_SUPPORT
-        schSetup();
-    #endif
-    #if UART_MQTT_SUPPORT
-        uartmqttSetup();
-    #endif
-
-
-    // 3rd party code hook
-    #if USE_EXTRA
-        extraSetup();
-    #endif
-
-    // Prepare configuration for version 2.0
-    migrate();
-
-    saveSettings();
-
-}
-
-void loop() {
-
-    // Call registered loop callbacks
-    for (unsigned char i = 0; i < _loop_callbacks.size(); i++) {
-        (_loop_callbacks[i])();
-    }
-
-}

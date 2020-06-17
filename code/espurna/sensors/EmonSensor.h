@@ -1,22 +1,24 @@
 // -----------------------------------------------------------------------------
 // Abstract Energy Monitor Sensor (other EMON sensors extend this class)
-// Copyright (C) 2017-2018 by Xose Pérez <xose dot perez at gmail dot com>
+// Copyright (C) 2017-2019 by Xose Pérez <xose dot perez at gmail dot com>
 // -----------------------------------------------------------------------------
 
 #if SENSOR_SUPPORT
 
 #pragma once
 
-#undef I2C_SUPPORT
-#define I2C_SUPPORT 1 // Explicitly request I2C support.
+#include <Arduino.h>
 
-#include "Arduino.h"
+#include "../debug.h"
+
+#include "BaseEmonSensor.h"
 #include "I2CSensor.h"
+
 extern "C" {
-    #include "libs/fs_math.h"
+    #include "../libs/fs_math.h"
 }
 
-class EmonSensor : public I2CSensor {
+class EmonSensor : public I2CSensor<BaseEmonSensor> {
 
     public:
 
@@ -24,7 +26,7 @@ class EmonSensor : public I2CSensor {
         // Public
         // ---------------------------------------------------------------------
 
-        EmonSensor(): I2CSensor() {
+        EmonSensor() {
 
             // Calculate # of magnitudes
             #if EMON_REPORT_CURRENT
@@ -39,7 +41,9 @@ class EmonSensor : public I2CSensor {
 
         }
 
-        void expectedPower(unsigned char channel, unsigned int expected) {
+        // ---------------------------------------------------------------------
+
+        void expectedPower(unsigned char channel, unsigned int expected) override {
             if (channel >= _channels) return;
             unsigned int actual = _current[channel] * _voltage;
             if (actual == 0) return;
@@ -49,15 +53,7 @@ class EmonSensor : public I2CSensor {
             _dirty = true;
         }
 
-        void resetEnergy() {
-            for (unsigned char i=0; i<_channels; i++) {
-                _energy[i] = 0;
-            }
-        }
-
-        // ---------------------------------------------------------------------
-
-        void setVoltage(double voltage) {
+        void setVoltage(double voltage) override {
             if (_voltage == voltage) return;
             _voltage = voltage;
             _dirty = true;
@@ -69,7 +65,11 @@ class EmonSensor : public I2CSensor {
             _dirty = true;
         }
 
-        void setCurrentRatio(unsigned char channel, double current_ratio) {
+        double defaultCurrentRatio() const override {
+            return EMON_CURRENT_RATIO;
+        }
+
+        void setCurrentRatio(unsigned char channel, double current_ratio) override {
             if (channel >= _channels) return;
             if (_current_ratio[channel] == current_ratio) return;
             _current_ratio[channel] = current_ratio;
@@ -77,9 +77,15 @@ class EmonSensor : public I2CSensor {
             _dirty = true;
         }
 
+        void resetRatios() override {
+            for (unsigned char channel = 0; channel < _channels; ++channel) {
+                setCurrentRatio(channel, defaultCurrentRatio());
+            }
+        }
+
         // ---------------------------------------------------------------------
 
-        double getVoltage() {
+        double getVoltage() override {
             return _voltage;
         }
 
@@ -87,12 +93,12 @@ class EmonSensor : public I2CSensor {
             return _reference;
         }
 
-        double getCurrentRatio(unsigned char channel) {
+        double getCurrentRatio(unsigned char channel) override {
             if (channel >= _channels) return 0;
             return _current_ratio[channel];
         }
 
-        unsigned char getChannels() {
+        size_t countDevices() override {
             return _channels;
         }
 
@@ -107,7 +113,7 @@ class EmonSensor : public I2CSensor {
 
             // Calculations
             for (unsigned char i=0; i<_channels; i++) {
-                _energy[i] = _current[i] = 0;
+                _energy[i] = _current[i] = 0.0;
                 _pivot[i] = _adc_counts >> 1;
                 calculateFactors(i);
             }
@@ -128,6 +134,11 @@ class EmonSensor : public I2CSensor {
 
         }
 
+        // Convert slot # index to a magnitude # index
+        unsigned char local(unsigned char index) override {
+            return (_magnitudes) ? (index / _magnitudes) : 0u;
+        }
+
     protected:
 
         // ---------------------------------------------------------------------
@@ -141,12 +152,9 @@ class EmonSensor : public I2CSensor {
             _multiplier = new uint16_t[_channels];
             _pivot = new double[_channels];
             _current = new double[_channels];
-            #if EMON_REPORT_ENERGY
-                _energy = new uint32_t[_channels];
-            #endif
         }
 
-        virtual unsigned int readADC(unsigned char channel) {}
+        virtual unsigned int readADC(unsigned char channel) = 0;
 
         void calculateFactors(unsigned char channel) {
 
@@ -154,8 +162,8 @@ class EmonSensor : public I2CSensor {
 
             unsigned int s = 1;
             unsigned int i = 1;
-            unsigned int m = s * i;
-            unsigned int multiplier;
+            unsigned int m = 1;
+            unsigned int multiplier = 1;
             while (m * _current_factor[channel] < 1) {
                 multiplier = m;
                 i = (i == 1) ? 2 : (i == 2) ? 5 : 1;
@@ -242,11 +250,6 @@ class EmonSensor : public I2CSensor {
 
         double * _pivot;                                // Moving average mid point (per channel)
         double * _current;                              // Last current reading (per channel)
-        #if EMON_REPORT_ENERGY
-            uint32_t * _energy;                         // Aggregated energy (per channel)
-        #endif
-
-
 
 };
 
