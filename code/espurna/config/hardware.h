@@ -392,7 +392,7 @@
 
     #define RTC_SUPPORT         1               // enable battery backed RTC for ntp
     #define RTC_PROVIDER        RTC_PROVIDER_DS3231 //RTC_DUMMY
-    #define RTC_NTP_SYNC_ENA	0               // enable sync RTC on NTP sync success
+    #define RTC_NTP_SYNC_ENA	1               // enable sync RTC on NTP sync success
 
 
 #elif defined(ITEAD_SONOFF_TH)
@@ -3561,6 +3561,15 @@
     // Relays
     #define RELAY1_PIN          4
     #define RELAY1_TYPE         RELAY_TYPE_NORMAL
+
+    #define I2C_SDA_PIN         1  // D2
+    #define I2C_SCL_PIN         3  // D1
+
+
+    #define RTC_SUPPORT         1               // enable battery backed RTC for ntp
+    #define RTC_PROVIDER        RTC_PROVIDER_DS3231 //RTC_DUMMY
+    #define RTC_NTP_SYNC_ENA	1               // enable sync RTC on NTP sync success
+
 
 #elif defined(ALLTERCO_SHELLY2)
 
