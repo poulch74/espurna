@@ -75,6 +75,10 @@ void _ntpWebSocketOnConnected(JsonObject& root) {
     root["ntpOffset"] = getSetting("ntpOffset", NTP_TIME_OFFSET);
     root["ntpDST"] = getSetting("ntpDST", 1 == NTP_DAY_LIGHT);
     root["ntpRegion"] = getSetting("ntpRegion", NTP_DST_REGION);
+
+    root["ntpLatitude"] = getSetting("ntpLatitude", NTP_LATITUDE);
+    root["ntpLongitude"] = getSetting("ntpLongitude", NTP_LONGITUDE);
+
 }
 
 #endif
@@ -212,7 +216,7 @@ void _ntpBackwards() {
 }
 
 // -----------------------------------------------------------------------------
-
+// 1546300800 01.01.2019
 bool ntpSynced() {
     #if NTP_WAIT_FOR_SYNC
         #if RTC_SUPPORT
@@ -225,6 +229,11 @@ bool ntpSynced() {
         // TODO: runtime setting?
         return true;
     #endif
+}
+
+time_t ntpSyncedEx() {
+    time_t t = now();
+    return (t>1546300800) ? t : 0; // 01.01.2019
 }
 
 

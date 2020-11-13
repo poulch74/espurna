@@ -1271,6 +1271,30 @@
 #define SI1145_ADDRESS                   0x60
 #endif
 
+
+
+//-------------------------------------------------------------
+// sunrise sensor support
+// for second add sensor init in sensor.ino
+// and SUNRISE2_ macros below
+//-------------------------------------------------------------
+#ifndef SUNRISE_SUPPORT
+#define SUNRISE_SUPPORT                0
+#endif
+
+#ifndef SUNRISE1_RELAY
+#define SUNRISE1_RELAY                 1
+#endif
+// signed char in minutes
+#ifndef SUNRISE1_RISE_OFS
+#define SUNRISE1_RISE_OFS              (0)
+#endif
+// signed char in minutes
+#ifndef SUNRISE1_SET_OFS
+#define SUNRISE1_SET_OFS               (0)
+#endif
+
+
 // -----------------------------------------------------------------------------
 // ADC
 // -----------------------------------------------------------------------------
@@ -1394,7 +1418,8 @@
     V9261F_SUPPORT || \
     VEML6075_SUPPORT || \
     VL53L1X_SUPPORT || \
-    HDC1080_SUPPORT \
+    HDC1080_SUPPORT ||\
+    SUNRISE_SUPPORT \
 )
 #endif
 

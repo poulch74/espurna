@@ -1,0 +1,2 @@
+${KISYS3DMOD}/Package_SO.3dshapes/SC-74-6_1.5x2.9mm_P0.95mm.wrl
+${KISYS3DMOD}/Package_SO.3dshapes/TSOP-6_1.65x3.05mm_P0.95mm.step

@@ -11,7 +11,7 @@
 
 //#define AITHINKER_AI_LIGHT
 //#define ALLNET_4DUINO_IOT_WLAN_RELAIS
-#define ALLTERCO_SHELLY1
+//#define ALLTERCO_SHELLY1
 //#define ALLTERCO_SHELLY1PM
 //#define ALLTERCO_SHELLY2
 //#define ALLTERCO_SHELLY25
@@ -190,7 +190,7 @@
 //#define DOMOTICZ_SUPPORT       0
 //#define ENCODER_SUPPORT        1
 //#define HOMEASSISTANT_SUPPORT  0
-#define I2C_SUPPORT            1
+//#define I2C_SUPPORT            1
 //#define INFLUXDB_SUPPORT       1
 //#define IR_SUPPORT             1
 //#define LED_SUPPORT            0

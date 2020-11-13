@@ -21,6 +21,10 @@
 
 #pragma once
 
+
+#define USE_CUSTOM_H
+#define SHAPESP_BUILD01
+
 #include <Arduino.h>
 #include <core_version.h>
 #include <pgmspace.h>

@@ -50,6 +50,7 @@ String ntpDateTime(tm* timestruct);
 String ntpDateTime(time_t ts);
 String ntpDateTime();
 bool ntpSynced();
+time_t ntpSyncedEx();
 
 void ntpSetup();
 

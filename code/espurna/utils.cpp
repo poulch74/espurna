@@ -755,6 +755,7 @@ int __get_adc_mode() {
     return (int) (ADC_MODE_VALUE);
 }
 
+
 bool isNumber(const char * s) {
     unsigned char len = strlen(s);
     if (0 == len) return false;

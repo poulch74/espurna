@@ -35,8 +35,9 @@ struct relay_t {
 
     // Default to dummy (virtual) relay configuration
 
-    relay_t(unsigned char pin, unsigned char type, unsigned char reset_pin) :
+    relay_t(unsigned char pin, unsigned char pin2, unsigned char type, unsigned char reset_pin) :
         pin(pin),
+		pin2(pin2),
         type(type),
         reset_pin(reset_pin),
         delay_on(0),
@@ -55,18 +56,19 @@ struct relay_t {
     {}
 
     relay_t() :
-        relay_t(GPIO_NONE, RELAY_TYPE_NORMAL, GPIO_NONE)
+        relay_t(GPIO_NONE, GPIO_NONE, RELAY_TYPE_NORMAL, GPIO_NONE)
     {}
 
     // ... unless there are pre-configured values
 
     relay_t(unsigned char id) :
-        relay_t(_relayPin(id), _relayType(id), _relayResetPin(id))
+        relay_t(_relayPin(id), _relayPin2(id), _relayType(id), _relayResetPin(id))
     {}
 
     // Configuration variables
 
     unsigned char pin;           // GPIO pin for the relay
+    unsigned char pin2;           // GPIO pin for the relay
     unsigned char type;          // RELAY_TYPE_NORMAL, RELAY_TYPE_INVERSE, RELAY_TYPE_LATCHED or RELAY_TYPE_LATCHED_INVERSE
     unsigned char reset_pin;     // GPIO to reset the relay if RELAY_TYPE_LATCHED
     unsigned long delay_on;      // Delay to turn relay ON
@@ -321,7 +323,12 @@ void _relayProviderStatus(unsigned char id, bool status) {
             nice_delay(RELAY_LATCHING_PULSE);
             digitalWrite(_relays[id].pin, !pulse);
             if (GPIO_NONE != _relays[id].reset_pin) digitalWrite(_relays[id].reset_pin, !pulse);
-        }
+        } else if(_relays[id].type == RELAY_TYPE_HBRIDGE) {
+		  		if(_relays[id].pulse_ms == 0) {
+					digitalWrite(_relays[id].pin, status);
+		        	digitalWrite(_relays[id].pin2, LOW);
+				}
+	}			
 
     #endif
 
@@ -847,8 +854,22 @@ void _relayConfigure() {
         _relays[i].delay_off = getSetting({"relayDelayOff", i}, _relayDelayOff(i));
 
         if (GPIO_NONE == _relays[i].pin) continue;
+		  pinMode(_relays[i].pin, OUTPUT);
 
-        pinMode(_relays[i].pin, OUTPUT);
+		  if(_relays[i].type == RELAY_TYPE_HBRIDGE)
+		  {
+              DEBUG_MSG(("[RELAY] init relay \n"));
+		  		if(GPIO_NONE == _relays[i].pin2) continue;
+				else 
+				{
+					pinMode(_relays[i].pin2, OUTPUT);
+					digitalWrite(_relays[i].pin, LOW);
+					digitalWrite(_relays[i].pin2, LOW);
+                    _relays[i].current_status = 0;
+				}
+		  }
+
+   
         if (GPIO_NONE != _relays[i].reset_pin) {
             pinMode(_relays[i].reset_pin, OUTPUT);
         }

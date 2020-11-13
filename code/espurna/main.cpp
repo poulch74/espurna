@@ -60,6 +60,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include "uartmqtt.h"
 #include "web.h"
 #include "ws.h"
+#include "Sunrise.h"
 
 std::vector<void_callback_f> _loop_callbacks;
 std::vector<void_callback_f> _reload_callbacks;
@@ -232,13 +233,16 @@ void setup() {
     #if SSDP_SUPPORT
         ssdpSetup();
     #endif
-    #if I2C_SUPPORT
-        i2cSetup();
-    #endif
     #if NTP_SUPPORT
         ntpSetup();
     #endif
-    #if RF_SUPPORT
+   #if SUNRISE_SUPPORT    
+        sunriseSetup();
+    #endif
+    #if I2C_SUPPORT
+        i2cSetup();
+    #endif
+     #if RF_SUPPORT
         rfbSetup();
     #endif
     #if ALEXA_SUPPORT

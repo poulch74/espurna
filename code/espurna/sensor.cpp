@@ -199,6 +199,10 @@ Copyright (C) 2016-2019 by Xose Pérez <xose dot perez at gmail dot com>
     #include "sensors/HDC1080Sensor.h"
 #endif
 
+#if SUNRISE_SUPPORT
+    #include "sensors/SunriseSensor.h"
+#endif
+
 //--------------------------------------------------------------------------------
 
 struct sensor_magnitude_t {
@@ -2055,6 +2059,17 @@ void _sensorLoad() {
     {
         HDC1080Sensor * sensor = new HDC1080Sensor();
         sensor->setAddress(HDC1080_ADDRESS);
+        _sensors.push_back(sensor);
+    }
+    #endif
+
+    #if SUNRISE_SUPPORT && NTP_SUPPORT
+    {
+        SunriseSensor * sensor = new SunriseSensor();
+        sensor->setIndex(1);
+        sensor->setRelayBinding(SUNRISE1_RELAY);
+        sensor->setRiseOffset(SUNRISE1_RISE_OFS);
+        sensor->setSetOffset(SUNRISE1_SET_OFS);
         _sensors.push_back(sensor);
     }
     #endif

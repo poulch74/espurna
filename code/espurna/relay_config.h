@@ -47,6 +47,20 @@ constexpr const unsigned char _relayPin(unsigned char index) {
     );
 }
 
+constexpr const unsigned char _relayPin2(unsigned char index) {
+    return (
+        (index == 0) ? RELAY1_PIN2 :
+        (index == 1) ? RELAY2_PIN2 :
+        (index == 2) ? RELAY3_PIN2 :
+        (index == 3) ? RELAY4_PIN2 :
+        (index == 4) ? RELAY5_PIN2 :
+        (index == 5) ? RELAY6_PIN2 :
+        (index == 6) ? RELAY7_PIN2 :
+        (index == 7) ? RELAY8_PIN2 : GPIO_NONE
+    );
+}
+
+
 constexpr const unsigned char _relayType(unsigned char index) {
     return (
         (index == 0) ? RELAY1_TYPE :

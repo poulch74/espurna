@@ -562,6 +562,33 @@
 #define RELAY8_PIN            GPIO_NONE
 #endif
 
+
+#ifndef RELAY1_PIN2
+#define RELAY1_PIN2            GPIO_NONE
+#endif
+#ifndef RELAY2_PIN2
+#define RELAY2_PIN2            GPIO_NONE
+#endif
+#ifndef RELAY3_PIN2
+#define RELAY3_PIN2            GPIO_NONE
+#endif
+#ifndef RELAY4_PIN2
+#define RELAY4_PIN2            GPIO_NONE
+#endif
+#ifndef RELAY5_PIN2
+#define RELAY5_PIN2            GPIO_NONE
+#endif
+#ifndef RELAY6_PIN2
+#define RELAY6_PIN2            GPIO_NONE
+#endif
+#ifndef RELAY7_PIN2
+#define RELAY7_PIN2            GPIO_NONE
+#endif
+#ifndef RELAY8_PIN2
+#define RELAY8_PIN2            GPIO_NONE
+#endif
+
+
 #ifndef RELAY1_TYPE
 #define RELAY1_TYPE           RELAY_TYPE_NORMAL
 #endif

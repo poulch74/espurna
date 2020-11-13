@@ -88,6 +88,9 @@
 #define RELAY_TYPE_LATCHED          2
 #define RELAY_TYPE_LATCHED_INVERSE  3
 
+//added
+#define RELAY_TYPE_HBRIDGE          4
+
 #define RELAY_SYNC_ANY              0
 #define RELAY_SYNC_NONE_OR_ONE      1
 #define RELAY_SYNC_ONE              2
@@ -333,6 +336,8 @@
 #define SENSOR_T6613_ID             38
 #define SENSOR_SI1145_ID            39
 #define SENSOR_HDC1080_ID           40
+
+#define SENSOR_SUNRISE_ID           41
 
 //--------------------------------------------------------------------------------
 // Magnitudes
